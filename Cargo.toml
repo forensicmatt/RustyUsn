@@ -5,3 +5,4 @@ authors = ["forensicmatt <matthew.seyer@gmail.com>"]
 
 [dependencies]
 clap = "*"
+encoding = "*"

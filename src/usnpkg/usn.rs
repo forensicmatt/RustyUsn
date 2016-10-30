@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::Read;
 use std::slice;
 use std::mem;
+extern crate encoding;
 
 #[derive(Debug)]
 pub struct UsnRecordV2 {
@@ -50,6 +51,9 @@ impl UsnConnection{
             // read into our sliced record
             self.filehandle.read_exact(record_slice).unwrap();
         }
+
+        record.file_name.reserve_exact(record.file_name_length * 2)
+        self.filehandle.read_to_string(&mut record.file_name);
 
         // return record
         return record;
