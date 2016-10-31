@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::Read;
 use std::slice;
 use std::mem;
-extern crate encoding;
 
 #[derive(Debug)]
 pub struct UsnRecordV2 {
@@ -43,7 +42,7 @@ impl UsnConnection{
         let r_size = 60;
 
         unsafe {
-            // slice our record into a byte array of r_size??
+            // slice our record into a byte array to read into
             let record_slice = slice::from_raw_parts_mut(
                 &mut record as *mut _ as *mut u8,
                 r_size
@@ -52,8 +51,22 @@ impl UsnConnection{
             self.filehandle.read_exact(record_slice).unwrap();
         }
 
-        record.file_name.reserve_exact(record.file_name_length * 2)
-        self.filehandle.read_to_string(&mut record.file_name);
+        // Create a vector to store the byte buffer
+        let mut buff_name = Vec::<u8>::with_capacity((record.file_name_length) as usize);
+        unsafe {
+            // set size of byte buffer
+            buff_name.set_len(record.file_name_length as usize);
+        }
+        // read into byte buffer
+        let bytes_read = self.filehandle.read(&mut buff_name[..]);
+
+        // create a utf-16 buffer from the byte buffer
+        let title: &[u16] = unsafe {
+            // slice into 2 byte pieces
+            slice::from_raw_parts(buff_name.as_ptr() as *const u16, buff_name.len() / 2)
+        };
+        // set record file_name
+        record.file_name = String::from_utf16(title).unwrap();
 
         // return record
         return record;
