@@ -109,6 +109,7 @@ pub fn open_file(filename: &str)->UsnConnection{
        Err(error) => panic!("Error: {}",error)
     };
 
+    // get file size
     let size = match usn_fh.seek(SeekFrom::End(0)){
         Err(e) => panic!("Error: {}",e),
         Ok(size) => size
