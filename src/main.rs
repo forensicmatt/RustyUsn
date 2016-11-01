@@ -29,8 +29,9 @@ fn main() {
         options.value_of("journal").unwrap()
     );
 
-    // get a record
-    let record = usn_connection.get_record();
-    // print a record
-    println!("USN structure: {:#?}", record);
+    let mut cnt = 1;
+    while let Some(record) = usn_connection.get_next_record(){
+        println!("USN structure {}: {:#?}",cnt,record);
+        cnt += 1;
+    };
 }
