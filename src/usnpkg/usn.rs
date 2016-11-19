@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io::Error;
 use std::io::Read;
 use std::io::Seek;
 use std::io::SeekFrom;
@@ -34,20 +35,20 @@ pub struct UsnConnection {
 // implement UsnConnection Functionality
 impl UsnConnection{
     // function for getting a record
-    pub fn get_next_record(&mut self)->Option<UsnRecordV2>{
+    pub fn get_next_record(&mut self)->Result<UsnRecordV2,Error>{
         loop {
-            // check we are not at the end of file
-            if self._offset == self._size {
-                return None;
-            }
-
             println!("function: get_record() at offset: {}", self._offset);
 
             // Seek to offset
-            let option = self.filehandle.seek(SeekFrom::Start(self._offset));
+            match self.filehandle.seek(SeekFrom::Start(self._offset)){
+                Ok(soffset) => soffset,
+                Err(error) => return Err(error)
+            };
 
             // init record struct
-            let mut record: UsnRecordV2 = unsafe { mem::zeroed() };
+            let mut record: UsnRecordV2 = unsafe {
+                mem::zeroed()
+            };
 
             // set the size we want to copy into the struct
             // in this case I only want the first 60 bytes of v2 record
@@ -78,7 +79,10 @@ impl UsnConnection{
                 buff_name.set_len(record.file_name_length as usize);
             }
             // read into byte buffer
-            let bytes_read = self.filehandle.read(&mut buff_name[..]);
+            match self.filehandle.read(&mut buff_name[..]){
+                Ok(bytes_read) => bytes_read,
+                Err(error) => return Err(error)
+            };
 
             // create a utf-16 buffer from the byte buffer
             let title: &[u16] = unsafe {
@@ -88,6 +92,7 @@ impl UsnConnection{
                     buff_name.len() / 2
                 )
             };
+            
             // set record file_name
             record.file_name = String::from_utf16(title).unwrap();
 
@@ -95,7 +100,7 @@ impl UsnConnection{
             self._offset += record.record_length as u64;
 
             // return record
-            return Some(record);
+            return Ok(record);
         }
     }
 }
@@ -105,8 +110,8 @@ pub fn open_file(filename: &str)->UsnConnection{
     // Open a filehandle to the file
     let mut usn_fh = match File::open(filename) {
         Ok(usn_fh) => usn_fh,
-       // Handle error here
-       Err(error) => panic!("Error: {}",error)
+        // Handle error here
+        Err(error) => panic!("Error: {}",error)
     };
 
     // get file size

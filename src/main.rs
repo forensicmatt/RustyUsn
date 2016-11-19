@@ -30,7 +30,7 @@ fn main() {
     );
 
     let mut cnt = 1;
-    while let Some(record) = usn_connection.get_next_record(){
+    while let Ok(record) = usn_connection.get_next_record(){
         println!("USN structure {}: {:#?}",cnt,record);
         cnt += 1;
     };
