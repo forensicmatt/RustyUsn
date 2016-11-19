@@ -1,5 +1,7 @@
+use usnpkg::chrono::*;
+use usnpkg::byteorder::{ReadBytesExt, LittleEndian};
 use std::fs::File;
-use std::io::Error;
+use std::io::{Error, ErrorKind};
 use std::io::Read;
 use std::io::Seek;
 use std::io::SeekFrom;
@@ -8,20 +10,23 @@ use std::mem;
 
 #[derive(Debug)]
 pub struct UsnRecordV2 {
+    // 0
     record_length: u32,
     major_version: u16,
     minor_version: u16,
     file_reference_number: u64,
     parent_file_reference_number: u64,
     usn: u64,
-    timestamp: u64,
+    // 32
+    timestamp: NaiveDateTime,
+    // 40
     reason: u32,
     source_info: u32,
     security_id: u32,
     file_attributes: u32,
     file_name_length: u16,
     file_name_offset: u16,
-    // 60 bytes for header //
+    // 60
     file_name: String
 }
 
@@ -37,34 +42,32 @@ impl UsnConnection{
     // function for getting a record
     pub fn get_next_record(&mut self)->Result<UsnRecordV2,Error>{
         loop {
-            println!("function: get_record() at offset: {}", self._offset);
+            // Check that our offset is not past the end of file
+            if self._offset >= self._size{
+                return Err(Error::new(ErrorKind::Other, "End of File"))
+            }
+
+            println!("function: get_next_record() at offset: {}", self._offset);
 
             // Seek to offset
-            match self.filehandle.seek(SeekFrom::Start(self._offset)){
+            let soffset = match self.filehandle.seek(SeekFrom::Start(self._offset)){
                 Ok(soffset) => soffset,
                 Err(error) => return Err(error)
             };
+
+            if soffset > self._size{
+                return Err(Error::new(ErrorKind::Other, "End of File"))
+            }
 
             // init record struct
             let mut record: UsnRecordV2 = unsafe {
                 mem::zeroed()
             };
 
-            // set the size we want to copy into the struct
-            // in this case I only want the first 60 bytes of v2 record
-            let r_size = 60;
-
-            let mut record_slice;
-            unsafe {
-                // slice our record into a byte array to read into
-                record_slice = slice::from_raw_parts_mut(
-                    &mut record as *mut _ as *mut u8,
-                    r_size
-                );
-
-                // read into our sliced record
-                self.filehandle.read(record_slice).unwrap();
-            }
+            ///////////////////////
+            // Read structure
+            ///////////////////////
+            record.record_length = self.filehandle.read_u32::<LittleEndian>().unwrap();
 
             // Do some record checks first
             if record.record_length == 0{
@@ -72,12 +75,34 @@ impl UsnConnection{
                 continue;
             }
 
+            record.major_version = self.filehandle.read_u16::<LittleEndian>().unwrap();
+            record.minor_version = self.filehandle.read_u16::<LittleEndian>().unwrap();
+            record.file_reference_number = self.filehandle.read_u64::<LittleEndian>().unwrap();
+            record.parent_file_reference_number = self.filehandle.read_u64::<LittleEndian>().unwrap();
+            record.usn = self.filehandle.read_u64::<LittleEndian>().unwrap();
+
+            // Get datetime struct
+            record.timestamp = NaiveDate::from_ymd(1601, 1, 1).and_hms_nano(0, 0, 0, 0);
+            // Get nanoseconds (100-nanosecond intervals)
+            let t_nano = self.filehandle.read_i64::<LittleEndian>().unwrap();
+            let t_micro = t_nano / 10;
+            // Add microseconds to timestamp
+            record.timestamp = record.timestamp + duration::Duration::microseconds(t_micro);
+
+            record.reason = self.filehandle.read_u32::<LittleEndian>().unwrap();
+            record.source_info = self.filehandle.read_u32::<LittleEndian>().unwrap();
+            record.security_id = self.filehandle.read_u32::<LittleEndian>().unwrap();
+            record.file_attributes = self.filehandle.read_u32::<LittleEndian>().unwrap();
+            record.file_name_length = self.filehandle.read_u16::<LittleEndian>().unwrap();
+            record.file_name_offset = self.filehandle.read_u16::<LittleEndian>().unwrap();
+
             // Create a vector to store the byte buffer
             let mut buff_name = Vec::<u8>::with_capacity((record.file_name_length) as usize);
             unsafe {
                 // set size of byte buffer
                 buff_name.set_len(record.file_name_length as usize);
             }
+
             // read into byte buffer
             match self.filehandle.read(&mut buff_name[..]){
                 Ok(bytes_read) => bytes_read,
@@ -92,7 +117,7 @@ impl UsnConnection{
                     buff_name.len() / 2
                 )
             };
-            
+
             // set record file_name
             record.file_name = String::from_utf16(title).unwrap();
 

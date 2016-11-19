@@ -4,4 +4,6 @@ version = "0.1.0"
 authors = ["forensicmatt <matthew.seyer@gmail.com>"]
 
 [dependencies]
+byteorder = "*"
+chrono = { version = "0.2", features = ["serde", "rustc-serialize"] }
 clap = "*"
