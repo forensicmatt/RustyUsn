@@ -1,14 +1,16 @@
-use usnpkg::chrono::*;
-use usnpkg::byteorder::{ReadBytesExt, LittleEndian};
-use std::fs::File;
-use std::io::{Error, ErrorKind};
-use std::io::Read;
-use std::io::Seek;
-use std::io::SeekFrom;
-use std::slice;
-use std::mem;
+use usnpkg::chrono::*;                                  //Datetime Handling
+use usnpkg::byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
+use std::fs::File;                                      //File handle
+use std::io::{Error, ErrorKind};                        //for error handling
+use std::io::Read;                                      //for Reading our File
+use std::io::Seek;                                      //for Seeking our File
+use std::io::SeekFrom;                                  //for Seeking our File
+use std::slice;                                         //for going from binary to structures
+use std::mem;                                           //for initializing our USN struct
 
-#[derive(Debug)]
+#[derive(Debug)] //So we can print our structure
+// Structure reference:
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa365722(v=vs.85).aspx
 pub struct UsnRecordV2 {
     // 0
     record_length: u32,
@@ -18,7 +20,7 @@ pub struct UsnRecordV2 {
     parent_file_reference_number: u64,
     usn: u64,
     // 32
-    timestamp: NaiveDateTime,
+    timestamp: NaiveDateTime, // Holds our datetime
     // 40
     reason: u32,
     source_info: u32,
@@ -27,14 +29,14 @@ pub struct UsnRecordV2 {
     file_name_length: u16,
     file_name_offset: u16,
     // 60
-    file_name: String
+    file_name: String // For unicode
 }
 
 // maintain UsnConnection info
 pub struct UsnConnection {
-    filehandle: File,
-    _offset: u64,
-    _size: u64
+    filehandle: File, // The filehandle
+    _offset: u64,     // maintain where we are in the file
+    _size: u64        // the size of the file
 }
 
 // implement UsnConnection Functionality
