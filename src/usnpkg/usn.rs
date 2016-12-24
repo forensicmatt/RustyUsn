@@ -76,21 +76,25 @@ impl UsnConnection{
                 self._offset += 8;
                 continue;
             }
+            // TODO: Add additional checks here
 
+            // Parse next 28 bytes
             record.major_version = self.filehandle.read_u16::<LittleEndian>().unwrap();
             record.minor_version = self.filehandle.read_u16::<LittleEndian>().unwrap();
             record.file_reference_number = self.filehandle.read_u64::<LittleEndian>().unwrap();
             record.parent_file_reference_number = self.filehandle.read_u64::<LittleEndian>().unwrap();
             record.usn = self.filehandle.read_u64::<LittleEndian>().unwrap();
 
-            // Get datetime struct
+            // Create datetime epoch (Windows epoch is 1601-01-01)
             record.timestamp = NaiveDate::from_ymd(1601, 1, 1).and_hms_nano(0, 0, 0, 0);
             // Get nanoseconds (100-nanosecond intervals)
             let t_nano = self.filehandle.read_i64::<LittleEndian>().unwrap();
+            // Convert to microseconds
             let t_micro = t_nano / 10;
-            // Add microseconds to timestamp
+            // Add microseconds to timestamp via Duration
             record.timestamp = record.timestamp + duration::Duration::microseconds(t_micro);
 
+            // Parse next 20 bytes
             record.reason = self.filehandle.read_u32::<LittleEndian>().unwrap();
             record.source_info = self.filehandle.read_u32::<LittleEndian>().unwrap();
             record.security_id = self.filehandle.read_u32::<LittleEndian>().unwrap();
@@ -112,7 +116,7 @@ impl UsnConnection{
             };
 
             // create a utf-16 buffer from the byte buffer
-            let title: &[u16] = unsafe {
+            let wchar_buff: &[u16] = unsafe {
                 // slice into 2 byte pieces
                 slice::from_raw_parts(
                     buff_name.as_ptr() as *const u16,
@@ -121,7 +125,7 @@ impl UsnConnection{
             };
 
             // set record file_name
-            record.file_name = String::from_utf16(title).unwrap();
+            record.file_name = String::from_utf16(wchar_buff).unwrap();
 
             // set new offset
             self._offset += record.record_length as u64;
