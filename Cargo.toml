@@ -1,9 +1,18 @@
 [package]
-name = "usntest"
+name = "rusty_usn"
 version = "0.1.0"
 authors = ["forensicmatt <matthew.seyer@gmail.com>"]
+
+[lib]
+name = "rustyusn"
+crate-type = ["cdylib"]
 
 [dependencies]
 byteorder = "*"
 chrono = { version = "0.2", features = ["serde", "rustc-serialize"] }
 clap = "*"
+
+[dependencies.cpython]
+version = "*"
+default-features = false
+features = ["python27-sys"]
