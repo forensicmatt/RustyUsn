@@ -20,7 +20,7 @@ fn usn_record_v2_test() {
     assert_eq!(bytes_read, 96);
 
     // parse raw buffer
-    // let mut record = usnpkg::get_record(buffer){
+    // let mut record = usnpkg::parse_record(buffer){
     //     Ok(record) => record,
     //     Err(error) => panic!("Error: {}",error)
     // };

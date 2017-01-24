@@ -161,3 +161,17 @@ pub fn open_file(filename: &str)->UsnConnection{
     // return our connection
     return usn_connection;
 }
+
+// Get Record from Buffer
+pub fn parse_record(buffer: &[u8])->Result<UsnRecordV2,Error>{
+    // Create record and initialize it
+    let mut record: UsnRecordV2 = unsafe {
+        mem::zeroed()
+    };
+
+    // record.record_length = unsafe {
+    //     mem::transmute(buffer[4])
+    // };
+
+    Ok(record)
+}
