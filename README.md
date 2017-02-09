@@ -1,5 +1,5 @@
 # RustyUsn
-A fast USN Parser writen in Rust.
+A fast and cross platform USN Parser writen in Rust.
 
 ```
 RusyUsn 0.2.0
