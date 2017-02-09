@@ -1,6 +1,66 @@
-mod usnpkg;
+#[macro_use] extern crate lazy_static;
 extern crate clap;
+extern crate byteorder;
+extern crate regex;
 use clap::{App, Arg};
+mod usnpkg;
+use regex::bytes;
+use std::io;
+use std::io::prelude::*;
+
+const BUFFER_SIZE: usize = 512;
+const OVERFLOW_SIZE: usize = 512;
+
+pub fn to_hex_string(bytes: Vec<u8>) -> String {
+    let strs: Vec<String> = bytes.iter()
+        .map(|b| format!("{:02X}", b))
+        .collect();
+    strs.join("")
+}
+
+pub fn fill_buffer<R: Read>(input_handle: &mut R, buffer_size: usize)->Result<Vec<u8>,io::Error>{
+    let mut bytes_in_buf: usize = 0;
+    let mut buffer = vec![0; buffer_size];
+    let end_ofs: usize = buffer_size;
+    let mut start_ofs: usize = 0;
+    let mut continue_flag: bool = false;
+
+    loop {
+        let bytes_read = match input_handle.read(&mut buffer[start_ofs .. end_ofs]) {
+            Ok(bytes_read) => bytes_read,
+            Err(error) => {
+                return Err(error);
+            }
+        };
+
+        // add the bytes read to the bytes in buffer count
+        bytes_in_buf += bytes_read;
+
+        // if bytes_read is zero, no more input
+        if bytes_read == 0 {
+            // Only break if there is no continue flag
+            if continue_flag == false {
+                break;
+            }
+        }
+        // If bytes_in_buf is less than our allocated buffer size lets read more.
+        else if bytes_in_buf < BUFFER_SIZE {
+            // we need to append our next read to where this buffer ends
+            start_ofs = bytes_in_buf;
+
+            // Set continue flag if not set
+            if continue_flag == false {
+                continue_flag = true;
+                continue;
+            }
+        }
+
+        break;
+    }
+
+    buffer.truncate(bytes_in_buf);
+    Ok(buffer)
+}
 
 fn main() {
     // define the journal parameter
@@ -9,35 +69,177 @@ fn main() {
         .long("journal")
         .value_name("FILE")
         .help("The USN journal file to parse")
-        .takes_value(true)
-        .required(true);
+        .required_unless("pipe")
+        .takes_value(true);
+
+    let pipe_arg = Arg::with_name("pipe")
+        .short("p")
+        .long("pipe")
+        .help("Input from piped stdin");
+
+    let verbose = Arg::with_name("verbose")
+        .short("v")
+        .long("verbose")
+        .help("Verbose output for debug");
 
     let options = App::new("MyUsnApp")
         .version("1.0")
         .author("Matthew Seyer <matthew.seyer@gmail.com>")
         .about("Parse USN records")
-        .arg(journal_arg) // add the journal parameter
+        .arg(journal_arg)   // add the journal parameter
+        .arg(pipe_arg)      // add the pipe parameter
+        .arg(verbose)       // add the verbose parameter
         .get_matches();
 
-    // output journal name
-    if let Some(journal_name) = options.value_of("journal") {
-        println!(
-            "Journal to parse: {}",
-            journal_name
+    let mut wtr = usnpkg::writer::Writer::new();
+
+    let pipe_flag = options.occurrences_of("pipe");
+    let verbose_flag = options.is_present("verbose");
+
+    wtr.write_header();
+
+    if pipe_flag == 1 {
+        let stdin = io::stdin();
+        let mut stdin = stdin.lock();
+        let mut read_buf_flag: bool = true;
+        let mut buffer: Vec<u8>;
+        let mut overflow: Vec<u8>;
+        let mut last_flag: bool = false;
+
+        // initialize buffers
+        buffer = vec![0; 0];
+        overflow = vec![0; 0];
+
+        lazy_static! {
+            static ref RE: bytes::Regex = bytes::Regex::new(
+                "..\x00\x00(\x02)\x00\x00\x00"
+            ).unwrap();
+        }
+
+        let mut total_read = 0;
+        // Iterate stdin
+        loop {
+            if read_buf_flag {
+                // Read stdin to buffer
+                buffer = match fill_buffer(&mut stdin, BUFFER_SIZE){
+                    Ok(buffer) => buffer,
+                    Err(error) => panic!(error)
+                };
+
+                // break if buffer size is zero
+                if buffer.len() == 0 {
+                    break;
+                }
+            }
+
+            // Get overflow for records exceding buffer
+            if !last_flag {
+                // get overflow buffer
+                overflow = match fill_buffer(&mut stdin, OVERFLOW_SIZE){
+                    Ok(overflow) => overflow,
+                    Err(error) => panic!(error)
+                };
+
+                // If there is no overflow we have reached the end of the file
+                if overflow.len() == 0 {
+                    // Set last_flag so we know to terminate after parsing the current buffer
+                    last_flag = true;
+                }
+            }
+
+            // Create the search buffer (buffer + overflow)
+            // We must add overflow because there is posibility that a record could span
+            // the buffer. We need to always have at least one mas record length in the
+            // overflow.
+            let mut search_buffer: Vec<u8> = Vec::new();
+            // Add buffer to search_buffer
+            search_buffer.extend_from_slice(&buffer[..]);
+            if !last_flag {
+                // Add overflow to buffer as long as this is not our last search
+                search_buffer.extend_from_slice(&overflow[..]);
+            }
+
+            // Pick end offset for regex search
+            // search only the buffer + what it takes to find a signature
+            let mut search_end: usize = buffer.len() + 8;
+            if search_buffer.len() < search_end {
+                search_end = search_buffer.len();
+            }
+
+            // regex buffer
+            let mut last_hit_end_ofs: usize = 0;
+            for hit in RE.find_iter(&search_buffer[.. search_end]) {
+                // set relative location
+                let location_rel: usize = hit.0;
+
+                // println!("Hit at: {}",location_rel);
+
+                // attempt to read record from start of match offset
+                let record: usnpkg::usn::UsnRecordV2 = match usnpkg::usn::read_record(&search_buffer[location_rel ..]) {
+                    Ok(record) => record,
+                    Err(error) => {
+                        if verbose_flag {
+                            println!("{:?}",error);
+                        }
+                        continue;
+                    }
+                };
+
+                // set end_ofs
+                last_hit_end_ofs = location_rel + (record.record_length as usize);
+
+                // println!("record offsets: {}-{}",total_read + location_rel,total_read + location_rel + (record.record_length as usize));
+
+                wtr.write_record(
+                    record,
+                    (total_read + location_rel) as u64
+                );
+            }
+
+            // Check if the end of the last hit was more than the buffer
+            let mut next_start: usize = 0;
+            if last_hit_end_ofs > buffer.len() {
+                // Because the record ran into the overflow we need to
+                // set the start point of overflow to copy into the buffer
+                // otherwise we can have duplicate hits because we would
+                // be parsing already searched buffer
+                next_start = last_hit_end_ofs - buffer.len();
+            } else {
+                // No overlap
+                next_start = 0;
+            }
+
+            // account to our total read count
+            total_read += buffer.len();
+
+            // if this is the last flag we can break
+            if last_flag {
+                break
+            } else {
+                // Acount for overlapped data searched for our total_read
+                total_read += next_start;
+                // copy overflow to our buffer
+                buffer = overflow[next_start..].to_vec();
+                // because we have filled the buffer from overflow, we do
+                // not need to read to our buffer.
+                read_buf_flag = false;
+            }
+        }
+    } else {
+        // get UsnConnection from a filename
+        let mut usn_connection = usnpkg::usn::open_file(
+            options.value_of("journal").unwrap(),
+            verbose_flag
         );
+
+        // iterate through each record in the journal
+        // We need to add error checking here and make sure
+        // we dont have an error other than end of file.
+        while let Ok(usn_result) = usn_connection.get_next_record(){
+            wtr.write_record(
+                usn_result.0,
+                usn_result.1
+            );
+        };
     }
-
-    // get UsnConnection from a filename
-    let mut usn_connection = usnpkg::usn::open_file(
-        options.value_of("journal").unwrap()
-    );
-
-    let mut cnt = 1;
-    // iterate through each record in the journal
-    // We need to add error checking here and make sure
-    // we dont have an error other than end of file.
-    while let Ok(record) = usn_connection.get_next_record(){
-        println!("USN structure {}: {:#?}",cnt,record);
-        cnt += 1;
-    };
 }
