@@ -12,6 +12,7 @@ lazy_static = "*"
 regex = "*"
 byteorder = "*"
 clap = "*"
+time = "*"
 
 [dependencies.chrono]
 version = "*"

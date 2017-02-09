@@ -1,4 +1,5 @@
 use usnpkg::chrono;                                     //Datetime Handling
+use usnpkg::time;
 use usnpkg::byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
 use std::io::{Error};
 use std::fmt;
@@ -15,7 +16,7 @@ impl WinTimestamp {
         // Add microseconds to timestamp via Duration
         (
             chrono::NaiveDate::from_ymd(1601, 1, 1).and_hms_nano(0, 0, 0, 0) + // Win Epoc = 1601-01-01
-            chrono::duration::Duration::microseconds(t_micro as i64)
+            time::Duration::microseconds(t_micro as i64)
         ) as chrono::NaiveDateTime
     }
 }
