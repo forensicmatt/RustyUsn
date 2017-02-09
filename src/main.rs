@@ -82,10 +82,10 @@ fn main() {
         .long("verbose")
         .help("Verbose output for debug");
 
-    let options = App::new("MyUsnApp")
-        .version("1.0")
+    let options = App::new("RusyUsn")
+        .version("0.2.0")
         .author("Matthew Seyer <matthew.seyer@gmail.com>")
-        .about("Parse USN records")
+        .about("USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn")
         .arg(journal_arg)   // add the journal parameter
         .arg(pipe_arg)      // add the pipe parameter
         .arg(verbose)       // add the verbose parameter

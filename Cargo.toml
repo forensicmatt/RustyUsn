@@ -1,5 +1,5 @@
 [package]
-name = "rusty_usn"
+name = "RusyUsn"
 version = "0.2.0"
 authors = ["forensicmatt <matthew.seyer@gmail.com>"]
 
