@@ -66,3 +66,9 @@ TotalMilliseconds : 2883.7932
 ```
 
 Both output produce the same results for this file. It is obvious that there are some improvements to be made on the file io option. Currently there is no buffering in place which could improve the time of the fileio option faster.
+
+## Carving
+The idea is to beable to parse records from stdin. You can grab unallocated with the Sleuthkit's blkls. Currently this has failed with RustyUsn.exe dying in some tests. I think more error checks are needed.
+```
+blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
+```
