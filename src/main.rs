@@ -170,7 +170,7 @@ fn main() {
             let mut last_hit_end_ofs: usize = 0;
             for hit in RE.find_iter(&search_buffer[.. search_end]) {
                 // set relative location
-                let location_rel: usize = hit.start();
+                let location_rel: usize = hit.0;
 
                 // println!("Hit at: {}",location_rel);
 

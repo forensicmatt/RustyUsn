@@ -49,6 +49,6 @@ fn main() {
     }
 
     for hit in RE.find_iter(&raw_buffer[..]) {
-        println!("Hit at: {}",hit.start());
+        println!("Hit at: {}",hit.0);
     }
 }

@@ -9,7 +9,7 @@ crate-type = ["cdylib","lib"]
 
 [dependencies]
 lazy_static = "*"
-regex = "*"
+regex = "0.1.80"
 byteorder = "*"
 clap = "*"
 time = "*"
