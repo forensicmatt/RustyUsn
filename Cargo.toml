@@ -8,9 +8,14 @@ name = "rustyusn"
 crate-type = ["cdylib","lib"]
 
 [dependencies]
+lazy_static = "*"
+regex = "*"
 byteorder = "*"
-chrono = { version = "0.2", features = ["serde", "rustc-serialize"] }
 clap = "*"
+
+[dependencies.chrono]
+version = "*"
+features = ["serde", "rustc-serialize"]
 
 [dependencies.cpython]
 version = "*"
