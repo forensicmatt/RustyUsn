@@ -1,6 +1,6 @@
 [package]
 name = "rusty_usn"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["forensicmatt <matthew.seyer@gmail.com>"]
 
 [lib]
