@@ -1,29 +1,34 @@
 extern crate rustyusn;
-use rustyusn::usnpkg;
-use std::fs::File;
-use std::io::BufReader;
-use std::io::Read;
+use rustyusn::usnpkg::usn;
 
 #[test]
 fn usn_record_v2_test() {
-    // Buffer for test
-    let mut buffer = [0u8; 96];
+    let record_buffer: &[u8] = &[
+        0x60,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x73,0x00,0x00,0x00,0x00,0x00,0x68,0x91,
+        0x3B,0x2A,0x02,0x00,0x00,0x00,0x07,0x00,0x00,0x00,0x80,0xBC,0x04,0x00,0x00,0x00,
+        0x53,0xC7,0x8B,0x18,0xC5,0xCC,0xCE,0x01,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x20,0x20,0x00,0x00,0x20,0x00,0x3C,0x00,0x42,0x00,0x54,0x00,
+        0x44,0x00,0x65,0x00,0x76,0x00,0x4D,0x00,0x61,0x00,0x6E,0x00,0x61,0x00,0x67,0x00,
+        0x65,0x00,0x72,0x00,0x2E,0x00,0x6C,0x00,0x6F,0x00,0x67,0x00,0x00,0x00,0x00,0x00
+    ];
 
-    // Open Filehandle to test record
-    let mut usn_fh = match File::open("testdata/record.usn") {
-        Ok(usn_fh) => usn_fh,
-        // Handle error here
-        Err(error) => panic!("Error: {}",error)
+    let record = match usn::read_record(record_buffer) {
+        Ok(record) => record,
+        Err(error) => panic!(error)
     };
 
-    let bytes_read = usn_fh.read(&mut buffer).unwrap();
-    assert_eq!(bytes_read, 96);
-
-    // parse raw buffer
-    // let mut record = usnpkg::parse_record(buffer){
-    //     Ok(record) => record,
-    //     Err(error) => panic!("Error: {}",error)
-    // };
-    //
-    // assert_eq!(record.record_length, 96);
+    assert_eq!(record.record_length, 96);
+    assert_eq!(record.major_version, 2);
+    assert_eq!(record.minor_version, 0);
+    assert_eq!(record.file_reference_number, 10477624533077459059);
+    assert_eq!(record.parent_file_reference_number, 1970324837116475);
+    assert_eq!(record.usn, 20342374400);
+    assert_eq!(record.timestamp.0, 130266586132760403);
+    assert_eq!(record.reason, 2);
+    assert_eq!(record.source_info, 0);
+    assert_eq!(record.security_id, 0);
+    assert_eq!(record.file_attributes, 8224);
+    assert_eq!(record.file_name_length, 32);
+    assert_eq!(record.file_name_offset, 60);
+    assert_eq!(record.file_name, "BTDevManager.log");
 }
