@@ -1,19 +1,29 @@
 # RustyUsn
-A Rust USN Parser
+A fast USN Parser writen in Rust.
 
-Just trying to learn some rust...
-
-Goals are to:
-- [x] Learn how to parse command line arguments
-- [x] Handle errors
-- [x] Read into structs
-- [x] Parse UFT-16
-- [ ] Datetime Timezone handling
-- [ ] Bind with python
-
-## Example
 ```
-target\release\rusty_usn.exe -j testdata\record.usn
+RusyUsn 0.2.0
+Matthew Seyer <matthew.seyer@gmail.com>
+USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn
+
+USAGE:
+    RusyUsn.exe [FLAGS] --journal <FILE>
+
+FLAGS:
+    -h, --help       Prints help information
+    -p, --pipe       Input from piped stdin
+    -V, --version    Prints version information
+    -v, --verbose    Verbose output for debug
+
+OPTIONS:
+    -j, --journal <FILE>    The USN journal file to parse
+```
+
+## Output
+The output is writen to stdout as tab seperated values.
+
+```
+target\release\RustyUsn.exe -j testdata\record.usn
 
 offset	record_length	major_version	minor_version	file_reference_number	parent_file_reference_number	usn	timestamp	reason	source_info	security_id	file_attributes	file_name_length	file_name_offset	file_name
 0	96	2	0	10477624533077459059	1970324837116475	20342374400	2013-10-19 12:16:53.276040	2	0	0	8224	32	60	BTDevManager.log
@@ -24,7 +34,7 @@ offset	record_length	major_version	minor_version	file_reference_number	parent_fi
 Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes).
 
 ```
-PS E:\RustyUsn\target\release> Measure-Command {.\rusty_usn.exe -j E:\Testing\UsnJrnl.J}
+PS E:\RustyUsn\target\release> Measure-Command {.\RustyUsn.exe -j E:\Testing\UsnJrnl.J}
 
 Days              : 0
 Hours             : 0
@@ -40,7 +50,7 @@ TotalMilliseconds : 6865.565
 ```
 
 ```
-PS E:\RustyUsn\target\release> Measure-Command {type E:\Testing\UsnJrnl.J | .\rusty_usn.exe -p}
+PS E:\RustyUsn\target\release> Measure-Command {type E:\Testing\UsnJrnl.J | .\RustyUsn.exe -p}
 
 Days              : 0
 Hours             : 0
