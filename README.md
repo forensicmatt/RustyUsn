@@ -7,29 +7,52 @@ Goals are to:
 - [x] Learn how to parse command line arguments
 - [x] Handle errors
 - [x] Read into structs
-- [ ] Datetime Timezone handling
 - [x] Parse UFT-16
+- [ ] Datetime Timezone handling
 - [ ] Bind with python
 
 ## Example
 ```
-target\debug\rusty_usn.exe -j testdata\record.usn
-Journal to parse: testdata\record.usn
-function: get_next_record() at offset: 0
-USN structure 1: UsnRecordV2 {
-    record_length: 96,
-    major_version: 2,
-    minor_version: 0,
-    file_reference_number: 10477624533077459059,
-    parent_file_reference_number: 1970324837116475,
-    usn: 20342374400,
-    timestamp: 2013-10-19T12:16:53.276040,
-    reason: 2,
-    source_info: 0,
-    security_id: 0,
-    file_attributes: 8224,
-    file_name_length: 32,
-    file_name_offset: 60,
-    file_name: "BTDevManager.log"
-}
+target\release\rusty_usn.exe -j testdata\record.usn
+
+offset	record_length	major_version	minor_version	file_reference_number	parent_file_reference_number	usn	timestamp	reason	source_info	security_id	file_attributes	file_name_length	file_name_offset	file_name
+0	96	2	0	10477624533077459059	1970324837116475	20342374400	2013-10-19 12:16:53.276040	2	0	0	8224	32	60	BTDevManager.log
+
 ```
+
+## Times
+Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes).
+
+```
+PS E:\RustyUsn\target\release> Measure-Command {.\rusty_usn.exe -j E:\Testing\UsnJrnl.J}
+
+Days              : 0
+Hours             : 0
+Minutes           : 0
+Seconds           : 6
+Milliseconds      : 865
+Ticks             : 68655650
+TotalDays         : 7.94625578703704E-05
+TotalHours        : 0.00190710138888889
+TotalMinutes      : 0.114426083333333
+TotalSeconds      : 6.865565
+TotalMilliseconds : 6865.565
+```
+
+```
+PS E:\RustyUsn\target\release> Measure-Command {type E:\Testing\UsnJrnl.J | .\rusty_usn.exe -p}
+
+Days              : 0
+Hours             : 0
+Minutes           : 0
+Seconds           : 2
+Milliseconds      : 883
+Ticks             : 28837932
+TotalDays         : 3.33772361111111E-05
+TotalHours        : 0.000801053666666667
+TotalMinutes      : 0.04806322
+TotalSeconds      : 2.8837932
+TotalMilliseconds : 2883.7932
+```
+
+Both output produce the same results for this file. It is obvious that there are some improvements to be made on the file io option. Currently there is no buffering in place which could improve the time of the fileio option faster.
