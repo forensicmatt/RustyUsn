@@ -1,4 +1,5 @@
 extern crate chrono;
+extern crate time;
 extern crate byteorder;
 extern crate regex;
 pub mod usn;
