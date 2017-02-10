@@ -31,7 +31,7 @@ offset	record_length	major_version	minor_version	file_reference_number	parent_fi
 ```
 
 ## Times
-Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes).
+Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes). For this set, both methods yielded the same results.
 
 ```
 PS E:\RustyUsn\target\release> Measure-Command {.\RustyUsn.exe -j E:\Testing\UsnJrnl.J}
