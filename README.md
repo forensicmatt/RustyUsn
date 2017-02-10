@@ -70,3 +70,12 @@ The idea is to beable to parse records from stdin. You can grab unallocated with
 ```
 blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 ```
+
+## Change Log
+#### RustyUsn 0.2.1
+- Using buffering with the seek_bufread lirary for better fileio operations.
+
+#### RustyUsn 0.2.0
+- Parse from STDIN with -p option
+- Added Tests
+- Internal Restructure
