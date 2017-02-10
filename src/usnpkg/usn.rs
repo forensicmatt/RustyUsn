@@ -1,4 +1,6 @@
 use usnpkg::byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
+// use std::io::BufReader;
+use usnpkg::seek_bufread::BufReader;
 use std::fs::File;                                      //File handle
 use std::io::{Error, ErrorKind};                        //for error handling
 use std::io::Read;                                      //for Reading our File
@@ -33,7 +35,7 @@ pub struct UsnRecordV2 {
 
 // maintain UsnConnection info
 pub struct UsnConnection {
-    filehandle: File, // The filehandle
+    filehandle: BufReader<File>, // File, // The filehandle
     _verbose: bool,   // verbose output
     _offset: u64,     // maintain where we are in the file
     _size: u64        // the size of the file
@@ -54,8 +56,6 @@ impl UsnConnection {
                 return Err(Error::new(ErrorKind::Other, "End of File"));
             }
 
-            // println!("function: get_next_record() at offset: {}", self._offset);
-
             // Seek to offset
             let soffset = match self.filehandle.seek(SeekFrom::Start(self._offset)){
                 Ok(soffset) => soffset,
@@ -66,7 +66,7 @@ impl UsnConnection {
                 return Err(Error::new(ErrorKind::Other, "End of File"));
             }
 
-            let record: UsnRecordV2 = match read_record(self.filehandle.try_clone().unwrap()) {
+            let record: UsnRecordV2 = match read_record(self.filehandle.by_ref()) {
                 Ok(record) => record,
                 Err(error) => {
                     if self._verbose {
@@ -101,7 +101,7 @@ pub fn open_file(filename: &str, verbose: bool)->UsnConnection{
 
     // Create UsnConnection
     let usn_connection = UsnConnection{
-        filehandle: usn_fh,
+        filehandle: BufReader::with_capacity(4096,usn_fh),
         _verbose: verbose,
         _offset: 0,
         _size: size
