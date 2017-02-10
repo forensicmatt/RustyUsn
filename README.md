@@ -39,14 +39,14 @@ PS E:\RustyUsn\target\release> Measure-Command {.\RustyUsn.exe -j E:\Testing\Usn
 Days              : 0
 Hours             : 0
 Minutes           : 0
-Seconds           : 6
-Milliseconds      : 865
-Ticks             : 68655650
-TotalDays         : 7.94625578703704E-05
-TotalHours        : 0.00190710138888889
-TotalMinutes      : 0.114426083333333
-TotalSeconds      : 6.865565
-TotalMilliseconds : 6865.565
+Seconds           : 1
+Milliseconds      : 362
+Ticks             : 13627682
+TotalDays         : 1.57727800925926E-05
+TotalHours        : 0.000378546722222222
+TotalMinutes      : 0.0227128033333333
+TotalSeconds      : 1.3627682
+TotalMilliseconds : 1362.7682
 ```
 
 ```
@@ -56,16 +56,14 @@ Days              : 0
 Hours             : 0
 Minutes           : 0
 Seconds           : 2
-Milliseconds      : 883
-Ticks             : 28837932
-TotalDays         : 3.33772361111111E-05
-TotalHours        : 0.000801053666666667
-TotalMinutes      : 0.04806322
-TotalSeconds      : 2.8837932
-TotalMilliseconds : 2883.7932
+Milliseconds      : 689
+Ticks             : 26892758
+TotalDays         : 3.11258773148148E-05
+TotalHours        : 0.000747021055555556
+TotalMinutes      : 0.0448212633333333
+TotalSeconds      : 2.6892758
+TotalMilliseconds : 2689.2758
 ```
-
-Both output produce the same results for this file. It is obvious that there are some improvements to be made on the file io option. Currently there is no buffering in place which could improve the time of the fileio option faster.
 
 ## Carving
 The idea is to beable to parse records from stdin. You can grab unallocated with the Sleuthkit's blkls. Currently this has failed with RustyUsn.exe dying in some tests. I think more error checks are needed.
