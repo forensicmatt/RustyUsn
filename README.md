@@ -72,10 +72,10 @@ blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 ```
 
 ## Change Log
-#### RustyUsn 0.2.1
+#### RustyUsn 0.2.1 (2017-02-09)
 - Using buffering with the seek_bufread lirary for better fileio operations.
 
-#### RustyUsn 0.2.0
+#### RustyUsn 0.2.0 (2017-02-08)
 - Parse from STDIN with -p option
 - Added Tests
 - Internal Restructure
