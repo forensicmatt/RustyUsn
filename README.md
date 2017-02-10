@@ -71,6 +71,9 @@ The idea is to beable to parse records from stdin. You can grab unallocated with
 blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 ```
 
+## Build
+All you need is a ```cargo build --release``` for compiling with Rust. Currently using Rust 1.15.0 Nightly.
+
 ## Change Log
 #### RustyUsn 0.2.1 (2017-02-09)
 - Using buffering with the seek_bufread lirary for better fileio operations.
