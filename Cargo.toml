@@ -13,6 +13,7 @@ regex = "0.1.80"
 byteorder = "*"
 clap = "*"
 time = "*"
+seek_bufread = "~1.2"
 
 [dependencies.chrono]
 version = "*"
