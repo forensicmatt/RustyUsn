@@ -2,7 +2,7 @@
 A fast and cross platform USN Parser writen in Rust.
 
 ```
-RusyUsn 0.2.0
+RusyUsn 0.3.0
 Matthew Seyer <matthew.seyer@gmail.com>
 USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn
 
@@ -10,6 +10,7 @@ USAGE:
     RusyUsn.exe [FLAGS] --journal <FILE>
 
 FLAGS:
+    -f, --flags      Print flags as integers and not strings
     -h, --help       Prints help information
     -p, --pipe       Input from piped stdin
     -V, --version    Prints version information
@@ -24,6 +25,11 @@ The output is writen to stdout as tab seperated values.
 
 ```
 target\release\RustyUsn.exe -j testdata\record.usn
+
+offset	record_length	major_version	minor_version	file_reference_number	parent_file_reference_number	usn	timestamp	reason	source_info	security_id	file_attributes	file_name_length	file_name_offset	file_name
+0	96	2	0	10477624533077459059	1970324837116475	20342374400	2013-10-19 12:16:53.276040	USN_REASON_DATA_EXTEND		0	8224	32	60	BTDevManager.log
+
+target\release\RustyUsn.exe -f -j testdata\record.usn
 
 offset	record_length	major_version	minor_version	file_reference_number	parent_file_reference_number	usn	timestamp	reason	source_info	security_id	file_attributes	file_name_length	file_name_offset	file_name
 0	96	2	0	10477624533077459059	1970324837116475	20342374400	2013-10-19 12:16:53.276040	2	0	0	8224	32	60	BTDevManager.log
