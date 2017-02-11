@@ -1,0 +1,606 @@
+Folder PATH listing
+Volume serial number is 0000000B DC98:9894
+C:.
+|   .gitignore
+|   build.bat
+|   Cargo.lock
+|   Cargo.toml
+|   LICENSE
+|   README.md
+|   test.py
+|   tree.txt
+|   
++---examples
+|       parse_record.rs
+|       regex_example.rs
+|       
++---src
+|   |   lib.rs
+|   |   main.rs
+|   |   
+|   +---python
+|   |       mod.rs
+|   |       pyusn.rs
+|   |       
+|   \---usnpkg
+|           flags.rs
+|           mod.rs
+|           timestamp.rs
+|           usn.rs
+|           usn_errors.rs
+|           writer.rs
+|           
++---target
+|   +---debug
+|   |   |   .cargo-lock
+|   |   |   librustyusn.rlib
+|   |   |   rustyusn.dll
+|   |   |   RusyUsn.exe
+|   |   |   
+|   |   +---.fingerprint
+|   |   |   +---aho-corasick-8d866fbdac670156
+|   |   |   |       dep-lib-aho_corasick-8d866fbdac670156
+|   |   |   |       lib-aho_corasick-8d866fbdac670156
+|   |   |   |       lib-aho_corasick-8d866fbdac670156.json
+|   |   |   |       
+|   |   |   +---ansi_term-5becde5b68583725
+|   |   |   |       dep-lib-ansi_term-5becde5b68583725
+|   |   |   |       lib-ansi_term-5becde5b68583725
+|   |   |   |       lib-ansi_term-5becde5b68583725.json
+|   |   |   |       
+|   |   |   +---bitflags-725a4e5043ace390
+|   |   |   |       dep-lib-bitflags-725a4e5043ace390
+|   |   |   |       lib-bitflags-725a4e5043ace390
+|   |   |   |       lib-bitflags-725a4e5043ace390.json
+|   |   |   |       
+|   |   |   +---byteorder-270f823a6260e0c1
+|   |   |   |       dep-lib-byteorder-270f823a6260e0c1
+|   |   |   |       lib-byteorder-270f823a6260e0c1
+|   |   |   |       lib-byteorder-270f823a6260e0c1.json
+|   |   |   |       
+|   |   |   +---chrono-76f9ce3e3669696e
+|   |   |   |       dep-lib-chrono-76f9ce3e3669696e
+|   |   |   |       lib-chrono-76f9ce3e3669696e
+|   |   |   |       lib-chrono-76f9ce3e3669696e.json
+|   |   |   |       
+|   |   |   +---clap-7e08aab1cbfbccfc
+|   |   |   |       dep-lib-clap-7e08aab1cbfbccfc
+|   |   |   |       lib-clap-7e08aab1cbfbccfc
+|   |   |   |       lib-clap-7e08aab1cbfbccfc.json
+|   |   |   |       
+|   |   |   +---cpython-472140332c91ca44
+|   |   |   |       build-script-build_script_build-472140332c91ca44
+|   |   |   |       build-script-build_script_build-472140332c91ca44.json
+|   |   |   |       dep-build-script-build_script_build-472140332c91ca44
+|   |   |   |       
+|   |   |   +---cpython-ba46aa80e51c8888
+|   |   |   |       build
+|   |   |   |       build.json
+|   |   |   |       
+|   |   |   +---cpython-d5982cdc7fb39c5c
+|   |   |   |       dep-lib-cpython-d5982cdc7fb39c5c
+|   |   |   |       lib-cpython-d5982cdc7fb39c5c
+|   |   |   |       lib-cpython-d5982cdc7fb39c5c.json
+|   |   |   |       
+|   |   |   +---kernel32-sys-2e2f735caa6bac8e
+|   |   |   |       build
+|   |   |   |       build.json
+|   |   |   |       
+|   |   |   +---kernel32-sys-7cda898cd53d6f66
+|   |   |   |       dep-lib-kernel32-7cda898cd53d6f66
+|   |   |   |       lib-kernel32-7cda898cd53d6f66
+|   |   |   |       lib-kernel32-7cda898cd53d6f66.json
+|   |   |   |       
+|   |   |   +---kernel32-sys-ef364f4d0d061b19
+|   |   |   |       build-script-build_script_build-ef364f4d0d061b19
+|   |   |   |       build-script-build_script_build-ef364f4d0d061b19.json
+|   |   |   |       dep-build-script-build_script_build-ef364f4d0d061b19
+|   |   |   |       
+|   |   |   +---lazy_static-13daae1d9a07c252
+|   |   |   |       dep-lib-lazy_static-13daae1d9a07c252
+|   |   |   |       lib-lazy_static-13daae1d9a07c252
+|   |   |   |       lib-lazy_static-13daae1d9a07c252.json
+|   |   |   |       
+|   |   |   +---libc-83c2bd88b43ecde3
+|   |   |   |       dep-lib-libc-83c2bd88b43ecde3
+|   |   |   |       lib-libc-83c2bd88b43ecde3
+|   |   |   |       lib-libc-83c2bd88b43ecde3.json
+|   |   |   |       
+|   |   |   +---memchr-667106a0439c1c44
+|   |   |   |       dep-lib-memchr-667106a0439c1c44
+|   |   |   |       lib-memchr-667106a0439c1c44
+|   |   |   |       lib-memchr-667106a0439c1c44.json
+|   |   |   |       
+|   |   |   +---num-324e13f9ba3b2c7d
+|   |   |   |       dep-lib-num-324e13f9ba3b2c7d
+|   |   |   |       lib-num-324e13f9ba3b2c7d
+|   |   |   |       lib-num-324e13f9ba3b2c7d.json
+|   |   |   |       
+|   |   |   +---num-integer-4c819e48d5fcce89
+|   |   |   |       dep-lib-num_integer-4c819e48d5fcce89
+|   |   |   |       lib-num_integer-4c819e48d5fcce89
+|   |   |   |       lib-num_integer-4c819e48d5fcce89.json
+|   |   |   |       
+|   |   |   +---num-iter-a08cc27ee32e82a2
+|   |   |   |       dep-lib-num_iter-a08cc27ee32e82a2
+|   |   |   |       lib-num_iter-a08cc27ee32e82a2
+|   |   |   |       lib-num_iter-a08cc27ee32e82a2.json
+|   |   |   |       
+|   |   |   +---num-traits-ba977ae2944b0245
+|   |   |   |       dep-lib-num_traits-ba977ae2944b0245
+|   |   |   |       lib-num_traits-ba977ae2944b0245
+|   |   |   |       lib-num_traits-ba977ae2944b0245.json
+|   |   |   |       
+|   |   |   +---python27-sys-5b5449afadc78850
+|   |   |   |       build
+|   |   |   |       build.json
+|   |   |   |       
+|   |   |   +---python27-sys-aa9f88f73d2a1cc3
+|   |   |   |       build-script-build_script_build-aa9f88f73d2a1cc3
+|   |   |   |       build-script-build_script_build-aa9f88f73d2a1cc3.json
+|   |   |   |       dep-build-script-build_script_build-aa9f88f73d2a1cc3
+|   |   |   |       
+|   |   |   +---python27-sys-f53a80623553f5cd
+|   |   |   |       dep-lib-python27_sys-f53a80623553f5cd
+|   |   |   |       lib-python27_sys-f53a80623553f5cd
+|   |   |   |       lib-python27_sys-f53a80623553f5cd.json
+|   |   |   |       
+|   |   |   +---regex-b87cd1b2417f0b56
+|   |   |   |       dep-lib-regex-b87cd1b2417f0b56
+|   |   |   |       lib-regex-b87cd1b2417f0b56
+|   |   |   |       lib-regex-b87cd1b2417f0b56.json
+|   |   |   |       
+|   |   |   +---regex-syntax-a1691e580add96f0
+|   |   |   |       dep-lib-regex_syntax-a1691e580add96f0
+|   |   |   |       lib-regex_syntax-a1691e580add96f0
+|   |   |   |       lib-regex_syntax-a1691e580add96f0.json
+|   |   |   |       
+|   |   |   +---rustc-serialize-03b62901d97343ea
+|   |   |   |       dep-lib-rustc_serialize-03b62901d97343ea
+|   |   |   |       lib-rustc_serialize-03b62901d97343ea
+|   |   |   |       lib-rustc_serialize-03b62901d97343ea.json
+|   |   |   |       
+|   |   |   +---RusyUsn-5ab96aeee8d3856d
+|   |   |   |       dep-lib-rustyusn-5ab96aeee8d3856d
+|   |   |   |       lib-rustyusn-5ab96aeee8d3856d
+|   |   |   |       lib-rustyusn-5ab96aeee8d3856d.json
+|   |   |   |       
+|   |   |   +---RusyUsn-a0bf981560842383
+|   |   |   |       dep-lib-rustyusn-a0bf981560842383
+|   |   |   |       lib-rustyusn-a0bf981560842383
+|   |   |   |       lib-rustyusn-a0bf981560842383.json
+|   |   |   |       
+|   |   |   +---RusyUsn-bc6da50eefa5bab0
+|   |   |   |       bin-RusyUsn-bc6da50eefa5bab0
+|   |   |   |       bin-RusyUsn-bc6da50eefa5bab0.json
+|   |   |   |       dep-bin-RusyUsn-bc6da50eefa5bab0
+|   |   |   |       
+|   |   |   +---RusyUsn-f17449049556d2e1
+|   |   |   |       bin-RusyUsn-f17449049556d2e1
+|   |   |   |       bin-RusyUsn-f17449049556d2e1.json
+|   |   |   |       dep-bin-RusyUsn-f17449049556d2e1
+|   |   |   |       
+|   |   |   +---seek_bufread-47c9c7de37a56dba
+|   |   |   |       dep-lib-seek_bufread-47c9c7de37a56dba
+|   |   |   |       lib-seek_bufread-47c9c7de37a56dba
+|   |   |   |       lib-seek_bufread-47c9c7de37a56dba.json
+|   |   |   |       
+|   |   |   +---serde-80f9b3bf2059379a
+|   |   |   |       dep-lib-serde-80f9b3bf2059379a
+|   |   |   |       lib-serde-80f9b3bf2059379a
+|   |   |   |       lib-serde-80f9b3bf2059379a.json
+|   |   |   |       
+|   |   |   +---strsim-6b57749ccc3f69ef
+|   |   |   |       dep-lib-strsim-6b57749ccc3f69ef
+|   |   |   |       lib-strsim-6b57749ccc3f69ef
+|   |   |   |       lib-strsim-6b57749ccc3f69ef.json
+|   |   |   |       
+|   |   |   +---term_size-11a3e8cfb1a8f674
+|   |   |   |       dep-lib-term_size-11a3e8cfb1a8f674
+|   |   |   |       lib-term_size-11a3e8cfb1a8f674
+|   |   |   |       lib-term_size-11a3e8cfb1a8f674.json
+|   |   |   |       
+|   |   |   +---thread-id-29cf57da6bdc517a
+|   |   |   |       dep-lib-thread_id-29cf57da6bdc517a
+|   |   |   |       lib-thread_id-29cf57da6bdc517a
+|   |   |   |       lib-thread_id-29cf57da6bdc517a.json
+|   |   |   |       
+|   |   |   +---thread_local-0553d3d1a0a49a55
+|   |   |   |       dep-lib-thread_local-0553d3d1a0a49a55
+|   |   |   |       lib-thread_local-0553d3d1a0a49a55
+|   |   |   |       lib-thread_local-0553d3d1a0a49a55.json
+|   |   |   |       
+|   |   |   +---time-53238cb92943b947
+|   |   |   |       dep-lib-time-53238cb92943b947
+|   |   |   |       lib-time-53238cb92943b947
+|   |   |   |       lib-time-53238cb92943b947.json
+|   |   |   |       
+|   |   |   +---unicode-segmentation-e53444f724bc7cb2
+|   |   |   |       dep-lib-unicode_segmentation-e53444f724bc7cb2
+|   |   |   |       lib-unicode_segmentation-e53444f724bc7cb2
+|   |   |   |       lib-unicode_segmentation-e53444f724bc7cb2.json
+|   |   |   |       
+|   |   |   +---unicode-width-a25f580735575909
+|   |   |   |       dep-lib-unicode_width-a25f580735575909
+|   |   |   |       lib-unicode_width-a25f580735575909
+|   |   |   |       lib-unicode_width-a25f580735575909.json
+|   |   |   |       
+|   |   |   +---utf8-ranges-ff1f7ad9d4bf7e02
+|   |   |   |       dep-lib-utf8_ranges-ff1f7ad9d4bf7e02
+|   |   |   |       lib-utf8_ranges-ff1f7ad9d4bf7e02
+|   |   |   |       lib-utf8_ranges-ff1f7ad9d4bf7e02.json
+|   |   |   |       
+|   |   |   +---vec_map-6bba3f7162a548ae
+|   |   |   |       dep-lib-vec_map-6bba3f7162a548ae
+|   |   |   |       lib-vec_map-6bba3f7162a548ae
+|   |   |   |       lib-vec_map-6bba3f7162a548ae.json
+|   |   |   |       
+|   |   |   +---winapi-3f4827e2e513c3d9
+|   |   |   |       dep-lib-winapi-3f4827e2e513c3d9
+|   |   |   |       lib-winapi-3f4827e2e513c3d9
+|   |   |   |       lib-winapi-3f4827e2e513c3d9.json
+|   |   |   |       
+|   |   |   \---winapi-build-be08217003a93e19
+|   |   |           dep-lib-build-be08217003a93e19
+|   |   |           lib-build-be08217003a93e19
+|   |   |           lib-build-be08217003a93e19.json
+|   |   |           
+|   |   +---build
+|   |   |   +---cpython-472140332c91ca44
+|   |   |   |       build-script-build.exe
+|   |   |   |       build_script_build-472140332c91ca44.exe
+|   |   |   |       build_script_build-472140332c91ca44.pdb
+|   |   |   |       
+|   |   |   +---cpython-ba46aa80e51c8888
+|   |   |   |   |   output
+|   |   |   |   |   
+|   |   |   |   \---out
+|   |   |   +---kernel32-sys-2e2f735caa6bac8e
+|   |   |   |   |   output
+|   |   |   |   |   
+|   |   |   |   \---out
+|   |   |   +---kernel32-sys-ef364f4d0d061b19
+|   |   |   |       build-script-build.exe
+|   |   |   |       build_script_build-ef364f4d0d061b19.exe
+|   |   |   |       build_script_build-ef364f4d0d061b19.pdb
+|   |   |   |       
+|   |   |   +---python27-sys-5b5449afadc78850
+|   |   |   |   |   output
+|   |   |   |   |   
+|   |   |   |   \---out
+|   |   |   \---python27-sys-aa9f88f73d2a1cc3
+|   |   |           build-script-build.exe
+|   |   |           build_script_build-aa9f88f73d2a1cc3.exe
+|   |   |           build_script_build-aa9f88f73d2a1cc3.pdb
+|   |   |           
+|   |   +---deps
+|   |   |       libaho_corasick-8d866fbdac670156.rlib
+|   |   |       libansi_term-5becde5b68583725.rlib
+|   |   |       libbitflags-725a4e5043ace390.rlib
+|   |   |       libbuild-be08217003a93e19.rlib
+|   |   |       libbyteorder-270f823a6260e0c1.rlib
+|   |   |       libchrono-76f9ce3e3669696e.rlib
+|   |   |       libclap-7e08aab1cbfbccfc.rlib
+|   |   |       libcpython-d5982cdc7fb39c5c.rlib
+|   |   |       libkernel32-7cda898cd53d6f66.rlib
+|   |   |       liblazy_static-13daae1d9a07c252.rlib
+|   |   |       liblibc-83c2bd88b43ecde3.rlib
+|   |   |       libmemchr-667106a0439c1c44.rlib
+|   |   |       libnum-324e13f9ba3b2c7d.rlib
+|   |   |       libnum_integer-4c819e48d5fcce89.rlib
+|   |   |       libnum_iter-a08cc27ee32e82a2.rlib
+|   |   |       libnum_traits-ba977ae2944b0245.rlib
+|   |   |       libpython27_sys-f53a80623553f5cd.rlib
+|   |   |       libregex-b87cd1b2417f0b56.rlib
+|   |   |       libregex_syntax-a1691e580add96f0.rlib
+|   |   |       librustc_serialize-03b62901d97343ea.rlib
+|   |   |       librustyusn-5ab96aeee8d3856d.rlib
+|   |   |       librustyusn-a0bf981560842383.rlib
+|   |   |       libseek_bufread-47c9c7de37a56dba.rlib
+|   |   |       libserde-80f9b3bf2059379a.rlib
+|   |   |       libstrsim-6b57749ccc3f69ef.rlib
+|   |   |       libterm_size-11a3e8cfb1a8f674.rlib
+|   |   |       libthread_id-29cf57da6bdc517a.rlib
+|   |   |       libthread_local-0553d3d1a0a49a55.rlib
+|   |   |       libtime-53238cb92943b947.rlib
+|   |   |       libunicode_segmentation-e53444f724bc7cb2.rlib
+|   |   |       libunicode_width-a25f580735575909.rlib
+|   |   |       libutf8_ranges-ff1f7ad9d4bf7e02.rlib
+|   |   |       libvec_map-6bba3f7162a548ae.rlib
+|   |   |       libwinapi-3f4827e2e513c3d9.rlib
+|   |   |       rustyusn-5ab96aeee8d3856d.dll
+|   |   |       rustyusn-5ab96aeee8d3856d.dll.exp
+|   |   |       rustyusn-5ab96aeee8d3856d.dll.lib
+|   |   |       rustyusn-5ab96aeee8d3856d.pdb
+|   |   |       rustyusn-a0bf981560842383.dll
+|   |   |       rustyusn-a0bf981560842383.dll.exp
+|   |   |       rustyusn-a0bf981560842383.dll.lib
+|   |   |       rustyusn-a0bf981560842383.pdb
+|   |   |       RusyUsn-bc6da50eefa5bab0.pdb
+|   |   |       RusyUsn-f17449049556d2e1.exe
+|   |   |       RusyUsn-f17449049556d2e1.pdb
+|   |   |       
+|   |   +---examples
+|   |   \---native
+|   \---release
+|       |   .cargo-lock
+|       |   librustyusn.rlib
+|       |   rustyusn.dll
+|       |   RusyUsn.exe
+|       |   
+|       +---.fingerprint
+|       |   +---aho-corasick-5c6bc25d8d3a791d
+|       |   |       dep-lib-aho_corasick-5c6bc25d8d3a791d
+|       |   |       lib-aho_corasick-5c6bc25d8d3a791d
+|       |   |       lib-aho_corasick-5c6bc25d8d3a791d.json
+|       |   |       
+|       |   +---ansi_term-c475da7956866055
+|       |   |       dep-lib-ansi_term-c475da7956866055
+|       |   |       lib-ansi_term-c475da7956866055
+|       |   |       lib-ansi_term-c475da7956866055.json
+|       |   |       
+|       |   +---bitflags-e290cd5819b8b8f3
+|       |   |       dep-lib-bitflags-e290cd5819b8b8f3
+|       |   |       lib-bitflags-e290cd5819b8b8f3
+|       |   |       lib-bitflags-e290cd5819b8b8f3.json
+|       |   |       
+|       |   +---byteorder-64c292745be2fae0
+|       |   |       dep-lib-byteorder-64c292745be2fae0
+|       |   |       lib-byteorder-64c292745be2fae0
+|       |   |       lib-byteorder-64c292745be2fae0.json
+|       |   |       
+|       |   +---chrono-856599c540004371
+|       |   |       dep-lib-chrono-856599c540004371
+|       |   |       lib-chrono-856599c540004371
+|       |   |       lib-chrono-856599c540004371.json
+|       |   |       
+|       |   +---clap-65c382e5b97195aa
+|       |   |       dep-lib-clap-65c382e5b97195aa
+|       |   |       lib-clap-65c382e5b97195aa
+|       |   |       lib-clap-65c382e5b97195aa.json
+|       |   |       
+|       |   +---cpython-6ec126d450a3b791
+|       |   |       build-script-build_script_build-6ec126d450a3b791
+|       |   |       build-script-build_script_build-6ec126d450a3b791.json
+|       |   |       dep-build-script-build_script_build-6ec126d450a3b791
+|       |   |       
+|       |   +---cpython-83ee0483f0b0b85f
+|       |   |       dep-lib-cpython-83ee0483f0b0b85f
+|       |   |       lib-cpython-83ee0483f0b0b85f
+|       |   |       lib-cpython-83ee0483f0b0b85f.json
+|       |   |       
+|       |   +---cpython-ba46aa80e51c8888
+|       |   |       build
+|       |   |       build.json
+|       |   |       
+|       |   +---kernel32-sys-2e2f735caa6bac8e
+|       |   |       build
+|       |   |       build.json
+|       |   |       
+|       |   +---kernel32-sys-4b518f498c1ea5ac
+|       |   |       dep-lib-kernel32-4b518f498c1ea5ac
+|       |   |       lib-kernel32-4b518f498c1ea5ac
+|       |   |       lib-kernel32-4b518f498c1ea5ac.json
+|       |   |       
+|       |   +---kernel32-sys-d153d929f8726e82
+|       |   |       build-script-build_script_build-d153d929f8726e82
+|       |   |       build-script-build_script_build-d153d929f8726e82.json
+|       |   |       dep-build-script-build_script_build-d153d929f8726e82
+|       |   |       
+|       |   +---lazy_static-71d2397280697ce5
+|       |   |       dep-lib-lazy_static-71d2397280697ce5
+|       |   |       lib-lazy_static-71d2397280697ce5
+|       |   |       lib-lazy_static-71d2397280697ce5.json
+|       |   |       
+|       |   +---libc-7cef59ab52023ebd
+|       |   |       dep-lib-libc-7cef59ab52023ebd
+|       |   |       lib-libc-7cef59ab52023ebd
+|       |   |       lib-libc-7cef59ab52023ebd.json
+|       |   |       
+|       |   +---memchr-e065dc882bfa2df6
+|       |   |       dep-lib-memchr-e065dc882bfa2df6
+|       |   |       lib-memchr-e065dc882bfa2df6
+|       |   |       lib-memchr-e065dc882bfa2df6.json
+|       |   |       
+|       |   +---num-5196260a17d9d54c
+|       |   |       dep-lib-num-5196260a17d9d54c
+|       |   |       lib-num-5196260a17d9d54c
+|       |   |       lib-num-5196260a17d9d54c.json
+|       |   |       
+|       |   +---num-integer-4431efb114b81eb7
+|       |   |       dep-lib-num_integer-4431efb114b81eb7
+|       |   |       lib-num_integer-4431efb114b81eb7
+|       |   |       lib-num_integer-4431efb114b81eb7.json
+|       |   |       
+|       |   +---num-iter-2a175c94c0e0f047
+|       |   |       dep-lib-num_iter-2a175c94c0e0f047
+|       |   |       lib-num_iter-2a175c94c0e0f047
+|       |   |       lib-num_iter-2a175c94c0e0f047.json
+|       |   |       
+|       |   +---num-traits-d95403325b93dccb
+|       |   |       dep-lib-num_traits-d95403325b93dccb
+|       |   |       lib-num_traits-d95403325b93dccb
+|       |   |       lib-num_traits-d95403325b93dccb.json
+|       |   |       
+|       |   +---python27-sys-5b5449afadc78850
+|       |   |       build
+|       |   |       build.json
+|       |   |       
+|       |   +---python27-sys-9603b5953160d399
+|       |   |       dep-lib-python27_sys-9603b5953160d399
+|       |   |       lib-python27_sys-9603b5953160d399
+|       |   |       lib-python27_sys-9603b5953160d399.json
+|       |   |       
+|       |   +---python27-sys-c51e45b05a2a21fe
+|       |   |       build-script-build_script_build-c51e45b05a2a21fe
+|       |   |       build-script-build_script_build-c51e45b05a2a21fe.json
+|       |   |       dep-build-script-build_script_build-c51e45b05a2a21fe
+|       |   |       
+|       |   +---regex-fdb9994f7c855b40
+|       |   |       dep-lib-regex-fdb9994f7c855b40
+|       |   |       lib-regex-fdb9994f7c855b40
+|       |   |       lib-regex-fdb9994f7c855b40.json
+|       |   |       
+|       |   +---regex-syntax-99506361c8e90f54
+|       |   |       dep-lib-regex_syntax-99506361c8e90f54
+|       |   |       lib-regex_syntax-99506361c8e90f54
+|       |   |       lib-regex_syntax-99506361c8e90f54.json
+|       |   |       
+|       |   +---rustc-serialize-f4966612c71e48c8
+|       |   |       dep-lib-rustc_serialize-f4966612c71e48c8
+|       |   |       lib-rustc_serialize-f4966612c71e48c8
+|       |   |       lib-rustc_serialize-f4966612c71e48c8.json
+|       |   |       
+|       |   +---RusyUsn-2deb053254527c42
+|       |   |       dep-lib-rustyusn-2deb053254527c42
+|       |   |       lib-rustyusn-2deb053254527c42
+|       |   |       lib-rustyusn-2deb053254527c42.json
+|       |   |       
+|       |   +---RusyUsn-93ebb9413e63f8de
+|       |   |       bin-RusyUsn-93ebb9413e63f8de
+|       |   |       bin-RusyUsn-93ebb9413e63f8de.json
+|       |   |       dep-bin-RusyUsn-93ebb9413e63f8de
+|       |   |       
+|       |   +---seek_bufread-986ad21d489cb7a4
+|       |   |       dep-lib-seek_bufread-986ad21d489cb7a4
+|       |   |       lib-seek_bufread-986ad21d489cb7a4
+|       |   |       lib-seek_bufread-986ad21d489cb7a4.json
+|       |   |       
+|       |   +---serde-656e065b975448d2
+|       |   |       dep-lib-serde-656e065b975448d2
+|       |   |       lib-serde-656e065b975448d2
+|       |   |       lib-serde-656e065b975448d2.json
+|       |   |       
+|       |   +---strsim-138c1b6b5d3ec75f
+|       |   |       dep-lib-strsim-138c1b6b5d3ec75f
+|       |   |       lib-strsim-138c1b6b5d3ec75f
+|       |   |       lib-strsim-138c1b6b5d3ec75f.json
+|       |   |       
+|       |   +---term_size-eeb1ee5b5e1eb249
+|       |   |       dep-lib-term_size-eeb1ee5b5e1eb249
+|       |   |       lib-term_size-eeb1ee5b5e1eb249
+|       |   |       lib-term_size-eeb1ee5b5e1eb249.json
+|       |   |       
+|       |   +---thread-id-daa3e2ddc51f8d14
+|       |   |       dep-lib-thread_id-daa3e2ddc51f8d14
+|       |   |       lib-thread_id-daa3e2ddc51f8d14
+|       |   |       lib-thread_id-daa3e2ddc51f8d14.json
+|       |   |       
+|       |   +---thread_local-6c1c3f7b9e578c1b
+|       |   |       dep-lib-thread_local-6c1c3f7b9e578c1b
+|       |   |       lib-thread_local-6c1c3f7b9e578c1b
+|       |   |       lib-thread_local-6c1c3f7b9e578c1b.json
+|       |   |       
+|       |   +---time-21206bae916c8e9f
+|       |   |       dep-lib-time-21206bae916c8e9f
+|       |   |       lib-time-21206bae916c8e9f
+|       |   |       lib-time-21206bae916c8e9f.json
+|       |   |       
+|       |   +---unicode-segmentation-077e3519e0fde862
+|       |   |       dep-lib-unicode_segmentation-077e3519e0fde862
+|       |   |       lib-unicode_segmentation-077e3519e0fde862
+|       |   |       lib-unicode_segmentation-077e3519e0fde862.json
+|       |   |       
+|       |   +---unicode-width-532714aec7829268
+|       |   |       dep-lib-unicode_width-532714aec7829268
+|       |   |       lib-unicode_width-532714aec7829268
+|       |   |       lib-unicode_width-532714aec7829268.json
+|       |   |       
+|       |   +---utf8-ranges-eee6e01646fa8d92
+|       |   |       dep-lib-utf8_ranges-eee6e01646fa8d92
+|       |   |       lib-utf8_ranges-eee6e01646fa8d92
+|       |   |       lib-utf8_ranges-eee6e01646fa8d92.json
+|       |   |       
+|       |   +---vec_map-30b783050663ec47
+|       |   |       dep-lib-vec_map-30b783050663ec47
+|       |   |       lib-vec_map-30b783050663ec47
+|       |   |       lib-vec_map-30b783050663ec47.json
+|       |   |       
+|       |   +---winapi-059ab74629fc5e13
+|       |   |       dep-lib-winapi-059ab74629fc5e13
+|       |   |       lib-winapi-059ab74629fc5e13
+|       |   |       lib-winapi-059ab74629fc5e13.json
+|       |   |       
+|       |   \---winapi-build-cfd6f6b28d7441dd
+|       |           dep-lib-build-cfd6f6b28d7441dd
+|       |           lib-build-cfd6f6b28d7441dd
+|       |           lib-build-cfd6f6b28d7441dd.json
+|       |           
+|       +---build
+|       |   +---cpython-6ec126d450a3b791
+|       |   |       build-script-build.exe
+|       |   |       build_script_build-6ec126d450a3b791.exe
+|       |   |       build_script_build-6ec126d450a3b791.pdb
+|       |   |       
+|       |   +---cpython-ba46aa80e51c8888
+|       |   |   |   output
+|       |   |   |   
+|       |   |   \---out
+|       |   +---kernel32-sys-2e2f735caa6bac8e
+|       |   |   |   output
+|       |   |   |   
+|       |   |   \---out
+|       |   +---kernel32-sys-d153d929f8726e82
+|       |   |       build-script-build.exe
+|       |   |       build_script_build-d153d929f8726e82.exe
+|       |   |       build_script_build-d153d929f8726e82.pdb
+|       |   |       
+|       |   +---python27-sys-5b5449afadc78850
+|       |   |   |   output
+|       |   |   |   
+|       |   |   \---out
+|       |   \---python27-sys-c51e45b05a2a21fe
+|       |           build-script-build.exe
+|       |           build_script_build-c51e45b05a2a21fe.exe
+|       |           build_script_build-c51e45b05a2a21fe.pdb
+|       |           
+|       +---deps
+|       |       libaho_corasick-5c6bc25d8d3a791d.rlib
+|       |       libansi_term-c475da7956866055.rlib
+|       |       libbitflags-e290cd5819b8b8f3.rlib
+|       |       libbuild-cfd6f6b28d7441dd.rlib
+|       |       libbyteorder-64c292745be2fae0.rlib
+|       |       libchrono-856599c540004371.rlib
+|       |       libclap-65c382e5b97195aa.rlib
+|       |       libcpython-83ee0483f0b0b85f.rlib
+|       |       libkernel32-4b518f498c1ea5ac.rlib
+|       |       liblazy_static-71d2397280697ce5.rlib
+|       |       liblibc-7cef59ab52023ebd.rlib
+|       |       libmemchr-e065dc882bfa2df6.rlib
+|       |       libnum-5196260a17d9d54c.rlib
+|       |       libnum_integer-4431efb114b81eb7.rlib
+|       |       libnum_iter-2a175c94c0e0f047.rlib
+|       |       libnum_traits-d95403325b93dccb.rlib
+|       |       libpython27_sys-9603b5953160d399.rlib
+|       |       libregex-fdb9994f7c855b40.rlib
+|       |       libregex_syntax-99506361c8e90f54.rlib
+|       |       librustc_serialize-f4966612c71e48c8.rlib
+|       |       librustyusn-2deb053254527c42.rlib
+|       |       libseek_bufread-986ad21d489cb7a4.rlib
+|       |       libserde-656e065b975448d2.rlib
+|       |       libstrsim-138c1b6b5d3ec75f.rlib
+|       |       libterm_size-eeb1ee5b5e1eb249.rlib
+|       |       libthread_id-daa3e2ddc51f8d14.rlib
+|       |       libthread_local-6c1c3f7b9e578c1b.rlib
+|       |       libtime-21206bae916c8e9f.rlib
+|       |       libunicode_segmentation-077e3519e0fde862.rlib
+|       |       libunicode_width-532714aec7829268.rlib
+|       |       libutf8_ranges-eee6e01646fa8d92.rlib
+|       |       libvec_map-30b783050663ec47.rlib
+|       |       libwinapi-059ab74629fc5e13.rlib
+|       |       rustyusn-2deb053254527c42.dll
+|       |       rustyusn-2deb053254527c42.dll.exp
+|       |       rustyusn-2deb053254527c42.dll.lib
+|       |       rustyusn-2deb053254527c42.pdb
+|       |       RusyUsn-93ebb9413e63f8de.exe
+|       |       RusyUsn-93ebb9413e63f8de.pdb
+|       |       
+|       +---examples
+|       \---native
++---testdata
+|       record.usn
+|       
+\---tests
+        record_tests.rs
+        timestamp_tests.rs
+        

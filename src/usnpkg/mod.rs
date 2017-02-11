@@ -4,6 +4,7 @@ extern crate byteorder;
 extern crate regex;
 extern crate seek_bufread;
 pub mod usn;
+pub mod flags;
 pub mod usn_errors;
 pub mod timestamp;
 pub mod writer;
