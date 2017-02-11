@@ -75,6 +75,9 @@ blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 All you need is a ```cargo build --release``` for compiling with Rust. Currently using Rust 1.15.0 Nightly.
 
 ## Change Log
+#### RustyUsn 0.3.0 (2017-02-10)
+- Added human readable flags by default and option for integer flags (-f --flag)
+
 #### RustyUsn 0.2.1 (2017-02-09)
 - Using buffering with the seek_bufread library for better File IO operations.
 
