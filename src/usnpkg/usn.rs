@@ -1,5 +1,5 @@
-use usnpkg::byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
-use usnpkg::seek_bufread::BufReader;
+use byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
+use seek_bufread::BufReader;
 use std::fs::File;                                      //File handle
 use std::io::{Error, ErrorKind};                        //for error handling
 use std::io::Read;                                      //for Reading our File

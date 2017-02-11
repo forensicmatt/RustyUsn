@@ -1,6 +1,6 @@
-use usnpkg::chrono;                                     //Datetime Handling
-use usnpkg::time;
-use usnpkg::byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
+use chrono;                                     //Datetime Handling
+use time;
+use byteorder::{ReadBytesExt, LittleEndian};    //Reading little endian data structs
 use std::io::{Error};
 use std::fmt;
 use std::fmt::{Display,Debug};
