@@ -88,7 +88,7 @@ fn main() {
         .help("Verbose output for debug");
 
     let options = App::new("RusyUsn")
-        .version("0.2.1")
+        .version("0.3.0")
         .author("Matthew Seyer <matthew.seyer@gmail.com>")
         .about("USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn")
         .arg(journal_arg)   // add the journal parameter
