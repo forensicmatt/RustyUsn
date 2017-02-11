@@ -9,6 +9,7 @@ use std::slice;                                         //for going from binary 
 use std::mem;                                           //for initializing our USN struct
 use usnpkg::usn_errors;
 use usnpkg::timestamp::{WinTimestamp};
+use usnpkg::flags;
 
 // Structure reference:
 // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365722(v=vs.85).aspx
@@ -22,8 +23,8 @@ pub struct UsnRecordV2 {
     pub parent_file_reference_number: u64,
     pub usn: u64,
     pub timestamp: WinTimestamp,
-    pub reason: u32,
-    pub source_info: u32,
+    pub reason: flags::Reason,
+    pub source_info: flags::SourceInfo,
     pub security_id: u32,
     pub file_attributes: u32,
     pub file_name_length: u16,
@@ -155,8 +156,10 @@ pub fn read_record<R: Read>(mut buffer: R)->Result<UsnRecordV2,usn_errors::UsnEr
     record.parent_file_reference_number = buffer.read_u64::<LittleEndian>()?;
     record.usn = buffer.read_u64::<LittleEndian>()?;
     record.timestamp = WinTimestamp(buffer.read_u64::<LittleEndian>()?);
-    record.reason = buffer.read_u32::<LittleEndian>()?;
-    record.source_info = buffer.read_u32::<LittleEndian>()?;
+
+    record.reason = flags::Reason::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
+    record.source_info = flags::SourceInfo::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
+
     record.security_id = buffer.read_u32::<LittleEndian>()?;
     record.file_attributes = buffer.read_u32::<LittleEndian>()?;
     record.file_name_length = buffer.read_u16::<LittleEndian>()?;

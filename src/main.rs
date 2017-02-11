@@ -1,9 +1,9 @@
 #[macro_use] extern crate lazy_static;
 extern crate clap;
-extern crate byteorder;
 extern crate regex;
+extern crate rustyusn;
+use rustyusn::usnpkg;
 use clap::{App, Arg};
-mod usnpkg;
 use regex::bytes;
 use std::io;
 use std::io::prelude::*;
@@ -77,6 +77,11 @@ fn main() {
         .long("pipe")
         .help("Input from piped stdin");
 
+    let flags_arg = Arg::with_name("flags")
+        .short("f")
+        .long("flags")
+        .help("Print flags as integers and not strings");
+
     let verbose = Arg::with_name("verbose")
         .short("v")
         .long("verbose")
@@ -88,13 +93,17 @@ fn main() {
         .about("USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn")
         .arg(journal_arg)   // add the journal parameter
         .arg(pipe_arg)      // add the pipe parameter
+        .arg(flags_arg)      // add the flags parameter
         .arg(verbose)       // add the verbose parameter
         .get_matches();
 
-    let mut wtr = usnpkg::writer::Writer::new();
-
     let pipe_flag = options.occurrences_of("pipe");
     let verbose_flag = options.is_present("verbose");
+    let int_flags_flag = options.is_present("flags");
+
+    let mut wtr = usnpkg::writer::Writer::new(
+        int_flags_flag
+    );
 
     wtr.write_header();
 
