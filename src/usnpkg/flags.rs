@@ -1,4 +1,7 @@
 use std::fmt;
+use serde::{ser};
+
+pub static mut FLAGS_AS_INT: bool = false;
 
 bitflags! {
     pub flags Reason: u32 {
@@ -41,9 +44,31 @@ impl fmt::Display for Reason {
         write!(f,"{}",self.bits())
     }
 }
+impl ser::Serialize for Reason {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: ser::Serializer
+    {
+        if unsafe{FLAGS_AS_INT} {
+            serializer.serialize_u32(self.bits())
+        } else {
+            serializer.serialize_str(&format!("{:?}", self))
+        }
+    }
+}
 
 impl fmt::Display for SourceInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,"{}",self.bits())
+    }
+}
+impl ser::Serialize for SourceInfo {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: ser::Serializer
+    {
+        if unsafe{FLAGS_AS_INT} {
+            serializer.serialize_u32(self.bits())
+        } else {
+            serializer.serialize_str(&format!("{:?}", self))
+        }
     }
 }

@@ -5,6 +5,7 @@ use std::io::{Error};
 use std::fmt;
 use std::fmt::{Display,Debug};
 use std::io::Read;
+use serde::{ser};
 
 pub struct WinTimestamp(
     pub u64
@@ -28,6 +29,13 @@ impl Display for WinTimestamp {
 impl Debug for WinTimestamp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,"{}",self.to_datetime())
+    }
+}
+impl ser::Serialize for WinTimestamp {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: ser::Serializer
+    {
+        serializer.serialize_str(&format!("{}", self.to_datetime()))
     }
 }
 

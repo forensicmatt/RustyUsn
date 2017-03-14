@@ -15,6 +15,9 @@ clap = "*"
 time = "*"
 seek_bufread = "~1.2"
 bitflags = "0.7"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
 
 [dependencies.chrono]
 version = "*"

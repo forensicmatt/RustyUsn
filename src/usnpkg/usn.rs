@@ -13,7 +13,7 @@ use usnpkg::flags;
 
 // Structure reference:
 // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365722(v=vs.85).aspx
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct UsnRecordV2 {
     // 0
     pub record_length: u32,

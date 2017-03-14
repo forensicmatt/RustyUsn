@@ -2,11 +2,16 @@
 extern crate clap;
 extern crate regex;
 extern crate rustyusn;
+extern crate serde_json;
+extern crate serde;
+use usnpkg::flags::{FLAGS_AS_INT};
+use serde::Serializer;
+use serde::ser::SerializeSeq;
 use rustyusn::usnpkg;
 use clap::{App, Arg};
 use regex::bytes;
-use std::io;
 use std::io::prelude::*;
+use std::io;
 
 const BUFFER_SIZE: usize = 512;
 const OVERFLOW_SIZE: usize = 512;
@@ -101,11 +106,16 @@ fn main() {
     let verbose_flag = options.is_present("verbose");
     let int_flags_flag = options.is_present("flags");
 
-    let mut wtr = usnpkg::writer::Writer::new(
-        int_flags_flag
-    );
+    if int_flags_flag {
+        unsafe {
+            FLAGS_AS_INT = true;
+        }
+    }
 
-    wtr.write_header();
+    let mut serializer = serde_json::Serializer::pretty(
+        io::stdout()
+    );
+    let mut seq = serializer.serialize_seq(None).unwrap();
 
     if pipe_flag == 1 {
         let stdin = io::stdin();
@@ -199,10 +209,7 @@ fn main() {
 
                 // println!("record offsets: {}-{}",total_read + location_rel,total_read + location_rel + (record.record_length as usize));
 
-                wtr.write_record(
-                    record,
-                    (total_read + location_rel) as u64
-                );
+                seq.serialize_element(&record).unwrap();
             }
 
             // Check if the end of the last hit was more than the buffer
@@ -245,10 +252,9 @@ fn main() {
         // We need to add error checking here and make sure
         // we dont have an error other than end of file.
         while let Ok(usn_result) = usn_connection.get_next_record(){
-            wtr.write_record(
-                usn_result.0,
-                usn_result.1
-            );
+            seq.serialize_element(&usn_result.0).unwrap();
         };
     }
+
+    seq.end().unwrap();
 }

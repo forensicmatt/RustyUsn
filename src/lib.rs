@@ -1,6 +1,9 @@
+#[macro_use] extern crate serde_derive;
+#[macro_use] extern crate serde_json;
 #[macro_use] extern crate cpython;
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate bitflags;
+extern crate serde;
 extern crate byteorder;
 extern crate seek_bufread;
 extern crate regex;
