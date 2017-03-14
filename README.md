@@ -21,22 +21,90 @@ OPTIONS:
 ```
 
 ## Output
-The output is writen to stdout as tab seperated values.
+The output is writen to stdout as a json list of records.
 
 ```
-target\release\RustyUsn.exe -j testdata\record.usn
+RustyUsn>target\release\RusyUsn.exe -j testdata\record.usn
+[
+  {
+    "record_length": 96,
+    "major_version": 2,
+    "minor_version": 0,
+    "file_reference_number": 10477624533077459059,
+    "parent_file_reference_number": 1970324837116475,
+    "usn": 20342374400,
+    "timestamp": "2013-10-19 12:16:53.276040",
+    "reason": "USN_REASON_DATA_EXTEND",
+    "source_info": "",
+    "security_id": 0,
+    "file_attributes": 8224,
+    "file_name_length": 32,
+    "file_name_offset": 60,
+    "file_name": "BTDevManager.log"
+  }
+]
 
-offset	record_length	major_version	minor_version	file_reference_number	parent_file_reference_number	usn	timestamp	reason	source_info	security_id	file_attributes	file_name_length	file_name_offset	file_name
-0	96	2	0	10477624533077459059	1970324837116475	20342374400	2013-10-19 12:16:53.276040	USN_REASON_DATA_EXTEND		0	8224	32	60	BTDevManager.log
-
-target\release\RustyUsn.exe -f -j testdata\record.usn
-
-offset	record_length	major_version	minor_version	file_reference_number	parent_file_reference_number	usn	timestamp	reason	source_info	security_id	file_attributes	file_name_length	file_name_offset	file_name
-0	96	2	0	10477624533077459059	1970324837116475	20342374400	2013-10-19 12:16:53.276040	2	0	0	8224	32	60	BTDevManager.log
+RustyUsn>target\release\RusyUsn.exe -f -j testdata\record.usn
+[
+  {
+    "record_length": 96,
+    "major_version": 2,
+    "minor_version": 0,
+    "file_reference_number": 10477624533077459059,
+    "parent_file_reference_number": 1970324837116475,
+    "usn": 20342374400,
+    "timestamp": "2013-10-19 12:16:53.276040",
+    "reason": 2,
+    "source_info": 0,
+    "security_id": 0,
+    "file_attributes": 8224,
+    "file_name_length": 32,
+    "file_name_offset": 60,
+    "file_name": "BTDevManager.log"
+  }
+]
 
 ```
-
 ## Times
+Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes). For this set, both methods yielded the same results.
+
+I have focused on json output do to the intrest of inserting into NoSQL or indexing. However, JSON serialization is much slower than just pring CSV values. I am posting current benchmarks for the new times. I will keep the old benchmarks for comparison under 'Old CSV Times' section.
+
+```
+PS E:\RustyUsn\target\release> Measure-Command {.\RusyUsn.exe -j E:\Testing\UsnJrnl.J}
+
+
+Days              : 0
+Hours             : 0
+Minutes           : 0
+Seconds           : 14
+Milliseconds      : 857
+Ticks             : 148573743
+TotalDays         : 0.000171960350694444
+TotalHours        : 0.00412704841666667
+TotalMinutes      : 0.247622905
+TotalSeconds      : 14.8573743
+TotalMilliseconds : 14857.3743
+```
+
+```
+PS E:\RustyUsn\target\release> Measure-Command {type E:\Testing\UsnJrnl.J | .\RusyUsn.exe -p}
+
+
+Days              : 0
+Hours             : 0
+Minutes           : 0
+Seconds           : 15
+Milliseconds      : 313
+Ticks             : 153139914
+TotalDays         : 0.000177245270833333
+TotalHours        : 0.0042538865
+TotalMinutes      : 0.25523319
+TotalSeconds      : 15.3139914
+TotalMilliseconds : 15313.9914
+```
+
+## Old CSV Times
 Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes). For this set, both methods yielded the same results.
 
 ```
