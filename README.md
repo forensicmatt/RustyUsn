@@ -68,7 +68,7 @@ RustyUsn>target\release\RusyUsn.exe -f -j testdata\record.usn
 ## Times
 Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes). For this set, both methods yielded the same results.
 
-I have focused on JSON output do to the interest of inserting into NoSQL or indexing. However, JSON serialization is much slower than just printing CSV values. I am posting current benchmarks for the new times. I will keep the old benchmarks for comparison under 'Old CSV Times' section.
+I have focused on JSON output due to the interest of inserting into NoSQL or indexing. However, JSON serialization is much slower than just printing CSV values. I am posting current benchmarks for the new times. I will keep the old benchmarks for comparison under 'Old CSV Times' section.
 
 ```
 PS E:\RustyUsn\target\release> Measure-Command {.\RusyUsn.exe -j E:\Testing\UsnJrnl.J}
