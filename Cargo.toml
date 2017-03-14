@@ -1,7 +1,7 @@
 [package]
 name = "RusyUsn"
-version = "0.3.0"
-authors = ["forensicmatt <matthew.seyer@gmail.com>"]
+version = "0.4.0"
+authors = ["Matthew Seyer <https://github.com/forensicmatt/RustyUsn>"]
 
 [lib]
 name = "rustyusn"

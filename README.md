@@ -1,10 +1,10 @@
 # RustyUsn
-A fast and cross platform USN Parser writen in Rust.
+A fast and cross platform USN Parser written in Rust.
 
 ```
-RusyUsn 0.3.0
+RusyUsn 0.4.0
 Matthew Seyer <matthew.seyer@gmail.com>
-USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn
+USN Parser written in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn
 
 USAGE:
     RusyUsn.exe [FLAGS] --journal <FILE>
@@ -21,7 +21,7 @@ OPTIONS:
 ```
 
 ## Output
-The output is writen to stdout as a json list of records.
+The output is written to stdout as a json list of records.
 
 ```
 RustyUsn>target\release\RusyUsn.exe -j testdata\record.usn
@@ -68,7 +68,7 @@ RustyUsn>target\release\RusyUsn.exe -f -j testdata\record.usn
 ## Times
 Here are some benchmarks ran on a USN Journal file that contains 367260 records and is 35.9 MB (37,687,192 bytes). For this set, both methods yielded the same results.
 
-I have focused on json output do to the intrest of inserting into NoSQL or indexing. However, JSON serialization is much slower than just pring CSV values. I am posting current benchmarks for the new times. I will keep the old benchmarks for comparison under 'Old CSV Times' section.
+I have focused on JSON output do to the interest of inserting into NoSQL or indexing. However, JSON serialization is much slower than just printing CSV values. I am posting current benchmarks for the new times. I will keep the old benchmarks for comparison under 'Old CSV Times' section.
 
 ```
 PS E:\RustyUsn\target\release> Measure-Command {.\RusyUsn.exe -j E:\Testing\UsnJrnl.J}
@@ -140,7 +140,7 @@ TotalMilliseconds : 2689.2758
 ```
 
 ## Carving
-The idea is to beable to parse records from stdin. You can grab unallocated with the Sleuthkit's blkls. Currently this has failed with RustyUsn.exe dying in some tests. I think more error checks are needed.
+The idea is to be able to parse records from stdin. You can grab unallocated with the Sleuthkit's blkls. Currently this has failed with RustyUsn.exe dying in some tests. I think more error checks are needed.
 ```
 blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 ```
@@ -149,6 +149,9 @@ blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 All you need is a ```cargo build --release``` for compiling with Rust. Currently using Rust 1.15.0 Nightly.
 
 ## Change Log
+#### RustyUsn 0.4.0 (2017-03-13)
+- Removed CSV output, Added JSON output
+
 #### RustyUsn 0.3.0 (2017-02-10)
 - Added human readable flags by default and option for integer flags (-f --flag)
 

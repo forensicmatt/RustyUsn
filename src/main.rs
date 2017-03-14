@@ -93,9 +93,9 @@ fn main() {
         .help("Verbose output for debug");
 
     let options = App::new("RusyUsn")
-        .version("0.3.0")
-        .author("Matthew Seyer <matthew.seyer@gmail.com>")
-        .about("USN Parser writen in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn")
+        .version("0.4.0")
+        .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
+        .about("USN Parser written in Rust.")
         .arg(journal_arg)   // add the journal parameter
         .arg(pipe_arg)      // add the pipe parameter
         .arg(flags_arg)      // add the flags parameter
