@@ -1,0 +1,52 @@
+{
+  "mappings": {
+    "rusty_usn": {
+      "properties": {
+        "record_length":{
+          "type": "long"
+        },
+        "major_version":{
+          "type": "long"
+        },
+        "minor_version":{
+          "type": "long"
+        },
+        "file_reference_number":{
+          "type": "long"
+        },
+        "parent_file_reference_number":{
+          "type": "long"
+        },
+        "usn":{
+          "type": "long"
+        },
+        "timestamp":{
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss.SSSSSS||MM/dd/yyyy HH:mm:ss"
+        },
+        "reason":{
+          "type": "string"
+        },
+        "source_info":{
+          "type": "long"
+        },
+        "security_id":{
+          "type": "long"
+        },
+        "file_attributes":{
+          "type": "long"
+        },
+        "file_name_length":{
+          "type": "long"
+        },
+        "file_name_offset":{
+          "type": "long"
+        },
+        "file_name":{
+          "type": "text",
+          "analyzer": "whitespace"
+        }
+      }
+    }
+  }
+}
