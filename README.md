@@ -3,8 +3,8 @@ A fast and cross platform USN Parser written in Rust.
 
 ```
 RusyUsn 0.4.0
-Matthew Seyer <matthew.seyer@gmail.com>
-USN Parser written in Rust. Check for updates at https://github.com/forensicmatt/RustyUsn
+Matthew Seyer <https://github.com/forensicmatt/RustyUsn>
+USN Parser written in Rust.
 
 USAGE:
     RusyUsn.exe [FLAGS] --journal <FILE>
