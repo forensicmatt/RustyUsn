@@ -3,6 +3,7 @@
 #[macro_use] extern crate cpython;
 #[macro_use] extern crate lazy_static;
 #[macro_use] extern crate bitflags;
+extern crate rwinstructs;
 extern crate serde;
 extern crate byteorder;
 extern crate seek_bufread;

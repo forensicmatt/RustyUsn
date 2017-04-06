@@ -8,7 +8,8 @@ use std::io::SeekFrom;                                  //for Seeking our File
 use std::slice;                                         //for going from binary to structures
 use std::mem;                                           //for initializing our USN struct
 use usnpkg::usn_errors;
-use usnpkg::timestamp::{WinTimestamp};
+use rwinstructs::timestamp::{WinTimestamp};
+use rwinstructs::reference::{MftReference};
 use usnpkg::flags;
 
 // Structure reference:
@@ -19,8 +20,8 @@ pub struct UsnRecordV2 {
     pub record_length: u32,
     pub major_version: u16,
     pub minor_version: u16,
-    pub file_reference_number: u64,
-    pub parent_file_reference_number: u64,
+    pub file_reference_number: MftReference,
+    pub parent_file_reference_number: MftReference,
     pub usn: u64,
     pub timestamp: WinTimestamp,
     pub reason: flags::Reason,
@@ -152,8 +153,8 @@ pub fn read_record<R: Read>(mut buffer: R)->Result<UsnRecordV2,usn_errors::UsnEr
             )
         );
     }
-    record.file_reference_number = buffer.read_u64::<LittleEndian>()?;
-    record.parent_file_reference_number = buffer.read_u64::<LittleEndian>()?;
+    record.file_reference_number = MftReference(buffer.read_u64::<LittleEndian>()?);
+    record.parent_file_reference_number = MftReference(buffer.read_u64::<LittleEndian>()?);
     record.usn = buffer.read_u64::<LittleEndian>()?;
     record.timestamp = WinTimestamp(buffer.read_u64::<LittleEndian>()?);
 

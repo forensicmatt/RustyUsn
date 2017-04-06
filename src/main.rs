@@ -2,12 +2,14 @@
 extern crate clap;
 extern crate regex;
 extern crate rustyusn;
+extern crate rwinstructs;
 extern crate serde_json;
 extern crate serde;
 use usnpkg::flags::{FLAGS_AS_INT};
 use serde::Serializer;
 use serde::ser::SerializeSeq;
 use rustyusn::usnpkg;
+use rwinstructs::serialize;
 use clap::{App, Arg};
 use regex::bytes;
 use std::io::prelude::*;
@@ -68,6 +70,10 @@ pub fn fill_buffer<R: Read>(input_handle: &mut R, buffer_size: usize)->Result<Ve
 }
 
 fn main() {
+    unsafe {
+        serialize::U64_SERIALIZATION = serialize::U64Serialization::AsString
+    }
+
     // define the journal parameter
     let journal_arg = Arg::with_name("journal")
         .short("j")
