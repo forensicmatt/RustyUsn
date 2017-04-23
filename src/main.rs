@@ -10,6 +10,7 @@ use serde::Serializer;
 use serde::ser::SerializeSeq;
 use rustyusn::usnpkg;
 use rwinstructs::serialize;
+use rwinstructs::reference;
 use clap::{App, Arg};
 use regex::bytes;
 use std::io::prelude::*;
@@ -71,6 +72,9 @@ pub fn fill_buffer<R: Read>(input_handle: &mut R, buffer_size: usize)->Result<Ve
 
 fn main() {
     unsafe {
+        reference::NESTED_REFERENCE = true
+    }
+    unsafe {
         serialize::U64_SERIALIZATION = serialize::U64Serialization::AsString
     }
 
@@ -93,6 +97,11 @@ fn main() {
         .long("flags")
         .help("Print flags as integers and not strings");
 
+    let nonest_arg = Arg::with_name("nonest")
+        .short("r")
+        .long("nonest")
+        .help("Do not use nested references.");
+
     let verbose = Arg::with_name("verbose")
         .short("v")
         .long("verbose")
@@ -105,12 +114,19 @@ fn main() {
         .arg(journal_arg)   // add the journal parameter
         .arg(pipe_arg)      // add the pipe parameter
         .arg(flags_arg)      // add the flags parameter
+        .arg(nonest_arg)      // add the no nest parameter
         .arg(verbose)       // add the verbose parameter
         .get_matches();
 
     let pipe_flag = options.occurrences_of("pipe");
     let verbose_flag = options.is_present("verbose");
     let int_flags_flag = options.is_present("flags");
+
+    if options.is_present("nonest"){
+        unsafe {
+            reference::NESTED_REFERENCE = false
+        }
+    }
 
     if int_flags_flag {
         unsafe {
