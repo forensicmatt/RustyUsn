@@ -11,4 +11,3 @@ extern crate regex;
 extern crate chrono;
 extern crate time;
 pub mod usnpkg;
-pub mod python;

@@ -1,0 +1,6 @@
+[package]
+name = "python"
+version = "0.1.0"
+authors = ["matthew seyer <https://github.com/forensicmatt/RustyUsn>"]
+
+[dependencies]
