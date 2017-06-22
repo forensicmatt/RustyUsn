@@ -1,6 +1,6 @@
 [package]
-name = "RusyUsn"
-version = "0.4.1"
+name = "RustyUsn"
+version = "0.5.0"
 authors = ["Matthew Seyer <https://github.com/forensicmatt/RustyUsn>"]
 
 [lib]
