@@ -146,6 +146,10 @@ blkls.exe -o OFFSET IMAGEPATH | RustyUsn.exe -p > carved_records.txt
 All you need is a ```cargo build --release``` for compiling with Rust. Currently using Rust 1.15.0 Nightly.
 
 ## Change Log
+#### RustyUsn 0.5.0 (2017-06-22)
+- Added JMES Query functionality (http://jmespath.org/)
+- Added JSONL output (http://jsonlines.org/)
+
 #### RustyUsn 0.4.1 (2017-04-05)
 - Now using r-winstructs for file references and timestamps. This means greater controll of serialization. references are now strings on json serialization.
 
