@@ -5,6 +5,7 @@ extern crate rustyusn;
 extern crate rwinstructs;
 extern crate serde_json;
 extern crate serde;
+extern crate jmespath;
 use usnpkg::flags::{FLAGS_AS_INT};
 use serde::Serializer;
 use serde::ser::SerializeSeq;
@@ -15,6 +16,7 @@ use clap::{App, Arg};
 use regex::bytes;
 use std::io::prelude::*;
 use std::io;
+use jmespath::{Expression};
 
 const BUFFER_SIZE: usize = 512;
 const OVERFLOW_SIZE: usize = 512;
@@ -79,13 +81,25 @@ fn main() {
     }
 
     // define the journal parameter
-    let journal_arg = Arg::with_name("journal")
-        .short("j")
-        .long("journal")
-        .value_name("FILE")
-        .help("The USN journal file to parse")
+    let source_arg = Arg::with_name("source")
+        .short("s")
+        .long("source")
+        .value_name("PATH")
+        .help("The USN journal file or folder with journals to parse.")
         .required_unless("pipe")
         .takes_value(true);
+
+    let jmes_arg = Arg::with_name("query")
+        .short("q")
+        .long("query")
+        .value_name("QUERY")
+        .help("JMES Query")
+        .takes_value(true);
+
+    let bool_arg = Arg::with_name("bool_expr")
+        .short("b")
+        .long("bool_expr")
+        .help("JMES Query as bool only. (Prints whole record if true.)");
 
     let pipe_arg = Arg::with_name("pipe")
         .short("p")
@@ -111,7 +125,9 @@ fn main() {
         .version("0.4.1")
         .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
         .about("USN Parser written in Rust.")
-        .arg(journal_arg)   // add the journal parameter
+        .arg(source_arg)   // add the journal parameter
+        .arg(jmes_arg)      // add the query parameter
+        .arg(bool_arg)
         .arg(pipe_arg)      // add the pipe parameter
         .arg(flags_arg)      // add the flags parameter
         .arg(nonest_arg)      // add the no nest parameter
@@ -121,6 +137,14 @@ fn main() {
     let pipe_flag = options.occurrences_of("pipe");
     let verbose_flag = options.is_present("verbose");
     let int_flags_flag = options.is_present("flags");
+
+    let mut expr: Option<Expression> = None;
+
+    if options.is_present("query") {
+        expr = Some(jmespath::compile(
+            options.value_of("query").unwrap()
+        ).unwrap());
+    }
 
     if options.is_present("nonest"){
         unsafe {
@@ -133,11 +157,6 @@ fn main() {
             FLAGS_AS_INT = true;
         }
     }
-
-    let mut serializer = serde_json::Serializer::pretty(
-        io::stdout()
-    );
-    let mut seq = serializer.serialize_seq(None).unwrap();
 
     if pipe_flag == 1 {
         let stdin = io::stdin();
@@ -231,7 +250,7 @@ fn main() {
 
                 // println!("record offsets: {}-{}",total_read + location_rel,total_read + location_rel + (record.record_length as usize));
 
-                seq.serialize_element(&record).unwrap();
+                println!("{}",serde_json::to_string(&record).unwrap());
             }
 
             // Check if the end of the last hit was more than the buffer
@@ -266,17 +285,44 @@ fn main() {
     } else {
         // get UsnConnection from a filename
         let mut usn_connection = usnpkg::usn::open_file(
-            options.value_of("journal").unwrap(),
+            options.value_of("source").unwrap(),
             verbose_flag
         );
 
         // iterate through each record in the journal
         // We need to add error checking here and make sure
         // we dont have an error other than end of file.
+        let mut expr_as_bool = false;
+        if options.is_present("bool_expr"){
+            expr_as_bool = true;
+        }
         while let Ok(usn_result) = usn_connection.get_next_record(){
-            seq.serialize_element(&usn_result.0).unwrap();
+            let json_str = serde_json::to_string(&usn_result.0).unwrap();
+
+            match expr {
+                Some(ref j_expr) => {
+                    let data = jmespath::Variable::from_json(&json_str).unwrap();
+                    let result = j_expr.search(data).unwrap();
+                    if expr_as_bool {
+                        match result.as_boolean() {
+                            Some(bool_value) => {
+                                match bool_value {
+                                    true => println!("{}",json_str),
+                                    false => {}
+                                }
+                            },
+                            None => {
+                                panic!("Query expression is not a bool expression!");
+                            }
+                        }
+                    } else {
+                        println!("{}",result)
+                    }
+                },
+                None => {
+                    println!("{}",json_str);
+                }
+            }
         };
     }
-
-    seq.end().unwrap();
 }

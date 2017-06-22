@@ -18,6 +18,7 @@ bitflags = "0.7"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
+jmespath = "^0.1.1"
 
 [dependencies.r-winstructs]
 version = "*"
