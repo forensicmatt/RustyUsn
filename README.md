@@ -1,5 +1,5 @@
 # RustyUsn
-A fast and cross platform USN Parser written in Rust that gives you the ability to query the records via JMES Query. Output is JSONL (http://jsonlines.org/).
+A fast and cross platform USN Parser written in Rust that gives you the ability to query the records via [JMESPath](http://jmespath.org/) queries. Output is [JSONL](http://jsonlines.org/).
 
 ```
 RusyUsn 0.5.0
