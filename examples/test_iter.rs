@@ -1,4 +1,3 @@
-#[macro_use] extern crate lazy_static;
 extern crate regex;
 use regex::bytes;
 
@@ -42,13 +41,11 @@ fn main() {
         0x00,0x00,0x00,0x00,0x20,0x20,0x00,0x00
     ];
 
-    lazy_static! {
-        static ref RE: bytes::Regex = bytes::Regex::new(
+    let re = bytes::Regex::new(
             "..\x00\x00(\x02)\x00\x00\x00"
         ).unwrap();
-    }
 
-    for hit in RE.find_iter(&raw_buffer[..]) {
-        println!("Hit at: {}",hit.0);
+    for hit in re.find_iter(&raw_buffer[..]) {
+        println!("Hit at: {}", hit.start());
     }
 }

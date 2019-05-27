@@ -1,35 +1,21 @@
 [package]
 name = "RustyUsn"
-version = "0.5.0"
+version = "1.0.0"
 authors = ["Matthew Seyer <https://github.com/forensicmatt/RustyUsn>"]
-
-[lib]
-name = "rustyusn"
-crate-type = ["cdylib","lib"]
+edition = "2018"
 
 [dependencies]
-lazy_static = "*"
-regex = "0.1.80"
-byteorder = "*"
 clap = "*"
-time = "*"
-seek_bufread = "~1.2"
-bitflags = "0.7"
-serde = "0.9"
-serde_derive = "0.9"
-serde_json = "0.9"
-jmespath = "^0.1.1"
+log = "0.4"
+fern = "0.5"
+chrono = "0.4"
+regex = "1"
+bitflags = "1.0"
+encoding = "0.2"
+serde = "1.0"
+serde_json = "1.0"
+byteorder = "1.3.1"
+winstructs = {git = "https://github.com/omerbenamram/winstructs.git", branch = "master"}
 
-[dependencies.r-winstructs]
-version = "*"
-branch = "master"
-git = "https://github.com/forensicmatt/r-winstructs"
-
-[dependencies.chrono]
-version = "*"
-features = ["serde", "rustc-serialize"]
-
-[dependencies.cpython]
-version = "*"
-default-features = false
-features = ["python27-sys"]
+[[bin]]
+name = "rusty_usn"

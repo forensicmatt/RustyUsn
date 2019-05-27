@@ -7,6 +7,7 @@ pub type Result<T> = StdResult<T, UsnError>;
 
 #[derive(Debug)]
 pub enum ErrorKind {
+    InvalidRecord,
     InvalidUsnV2Record,
     UnsupportedVersion,
     IoError,
@@ -24,6 +25,15 @@ pub struct UsnError {
 }
 
 impl UsnError{
+    #[allow(dead_code)]
+    pub fn invalid_length(err: String)->Self{
+        UsnError {
+            message: format!("{}",err),
+            kind: ErrorKind::InvalidRecord,
+            info: Some(vec![]),
+        }
+    }
+
     #[allow(dead_code)]
     pub fn invalid_v2_record(err: String)->Self{
         UsnError {
