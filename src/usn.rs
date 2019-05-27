@@ -169,14 +169,17 @@ impl Iterator for IterRecords {
                 None => break
             };
 
+            // the entries' absolute offset
+            let entry_offset = self.start_offset + start_of_hit;
+
             // parse record
             let usn_record = match UsnEntry::new(
-                self.start_offset + start_of_hit, 2, 
+                entry_offset, 2, 
                 &self.block[start_of_hit as usize ..]
             ){
                 Ok(record) => record,
                 Err(error) => {
-                    debug!("error: {}", error);
+                    debug!("error at offset {}: {}", entry_offset, error);
                     continue;
                 }
             };
