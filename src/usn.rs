@@ -1,7 +1,12 @@
+#[cfg(feature = "multithreading")]
+use rayon;
 use std::io;
 use regex::bytes;
+use std::cmp::max;
 use std::fs::File;
 use std::io::SeekFrom;
+#[cfg(feature = "multithreading")]
+use rayon::prelude::*;
 use crate::ReadSeek;
 use crate::record::UsnEntry;
 
@@ -14,9 +19,50 @@ const SIZE_CHUNK: usize = 5120;
 const SIZE_SEARCH: usize = 4096;
 
 
+pub struct UsnParserSettings{
+    thread_count: usize
+}
+
+impl Default for UsnParserSettings {
+    fn default() -> Self {
+        UsnParserSettings {
+            thread_count: 0
+        }
+    }
+}
+
+impl UsnParserSettings {
+    pub fn new() -> UsnParserSettings {
+        UsnParserSettings::default()
+    }
+
+    /// Sets the number of worker threads.
+    /// `0` will let rayon decide.
+    ///
+    #[cfg(feature = "multithreading")]
+    pub fn thread_count(mut self, thread_count: usize) -> Self {
+        self.thread_count = if thread_count == 0 {
+            rayon::current_num_threads()
+        } else {
+            thread_count
+        };
+        self
+    }
+
+    /// Does nothing and emits a warning when complied without multithreading.
+    #[cfg(not(feature = "multithreading"))]
+    pub fn thread_count(mut self, _thread_count: usize) -> Self {
+        warn!("Setting num_threads has no effect when compiling without multithreading support.");
+        self.thread_count = 1;
+        self
+    }
+}
+
+
 pub struct UsnParser<T: ReadSeek> {
     _inner_handle: T,
     _size: u64,
+    settings: UsnParserSettings
 }
 
 impl UsnParser<File> {
@@ -37,10 +83,16 @@ impl <T: ReadSeek> UsnParser <T> {
         // Seek back to the beginning
         inner_handle.seek(SeekFrom::Start(0))?;
 
-        Ok(Self {
+        Ok( Self {
             _inner_handle: inner_handle,
             _size: end_offset,
+            settings: UsnParserSettings::default()
         })
+    }
+
+    pub fn with_configuration(mut self, configuration: UsnParserSettings) -> Self {
+        self.settings = configuration;
+        self
     }
 
     pub fn get_chunk_iterator(&mut self) -> IterFileChunks<T> {
@@ -50,6 +102,45 @@ impl <T: ReadSeek> UsnParser <T> {
             search_size: SIZE_SEARCH,
             chunk_start_offset: 0,
         }
+    }
+
+    pub fn records(&mut self) -> impl Iterator<Item = UsnEntry> + '_ {
+        let num_threads = max(self.settings.thread_count, 1);
+
+        let mut chunks = self.get_chunk_iterator();
+
+        let records_per_chunk = std::iter::from_fn(move || 
+            {
+                // Allocate some chunks in advance, so they can be parsed in parallel.
+                let mut list_of_chunks = Vec::with_capacity(num_threads);
+
+                for _ in 0..num_threads {
+                    if let Some(chunk) = chunks.next() {
+                        list_of_chunks.push(chunk);
+                    };
+                }
+
+                // We only stop once no chunks can be allocated.
+                if list_of_chunks.is_empty() {
+                    None
+                } else {
+                    #[cfg(feature = "multithreading")]
+                    let chunk_iter = list_of_chunks.into_par_iter();
+                    #[cfg(not(feature = "multithreading"))]
+                    let chunk_iter = list_of_chunks.into_iter();
+
+                    // Serialize the records in each chunk.
+                    let iterators: Vec<Vec<UsnEntry>> = chunk_iter
+                        .map(|data_chunk| data_chunk.get_records()
+                        )
+                        .collect();
+
+                    Some(iterators.into_iter().flatten())
+                }
+            }
+        );
+
+        records_per_chunk.flatten()
     }
 }
 
@@ -174,7 +265,7 @@ impl Iterator for IterRecords {
             let entry_offset = self.start_offset + start_of_hit;
 
             // parse record
-            let usn_record = match UsnEntry::new(
+            let usn_entry = match UsnEntry::new(
                 entry_offset, 2, 
                 &self.block[start_of_hit as usize ..]
             ){
@@ -185,7 +276,7 @@ impl Iterator for IterRecords {
                 }
             };
 
-            return Some(usn_record);
+            return Some(usn_entry);
         }
 
         None

@@ -7,9 +7,17 @@ use std::path::Path;
 use log::LevelFilter;
 use std::process::exit;
 use clap::{App, Arg, ArgMatches};
-use RustyUsn::usn::UsnParser;
+use RustyUsn::usn::{UsnParserSettings, UsnParser};
 
 static VERSION: &'static str = "1.0.0";
+
+
+fn is_a_non_negative_number(value: String) -> Result<(), String> {
+    match value.parse::<usize>() {
+        Ok(_) => Ok(()),
+        Err(_) => Err("Expected value to be a positive number.".to_owned()),
+    }
+}
 
 
 fn make_app<'a, 'b>() -> App<'a, 'b> {
@@ -19,6 +27,13 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .value_name("PATH")
         .help("The source to parse.")
         .takes_value(true);
+
+    let thread_count = Arg::with_name("threads")
+        .short("-t")
+        .long("--threads")
+        .default_value("0")
+        .validator(is_a_non_negative_number)
+        .help("Sets the number of worker threads, defaults to number of CPU cores.");
 
     let verbose = Arg::with_name("debug")
         .short("-d")
@@ -33,6 +48,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
         .about("USN Parser written in Rust.")
         .arg(source_arg)
+        .arg(thread_count)
         .arg(verbose)
 }
 
@@ -94,23 +110,35 @@ fn is_directory(source: &str)->bool{
 }
 
 
-fn process_file(file_location: &str) {
+fn process_file(file_location: &str, options: &ArgMatches) {
     info!("processing {}", file_location);
 
+    let threads = options
+            .value_of("threads")
+            .and_then(|value| Some(value.parse::<usize>().expect("used validator")));
+
+    let threads = match (cfg!(feature = "multithreading"), threads) {
+        (true, Some(number)) => number,
+        (true, None) => 0,
+        (false, _) => {
+            eprintln!("turned on threads, but library was compiled without `multithreading` feature!");
+            1
+        }
+    };
+
+    let config = UsnParserSettings::new().thread_count(threads);
+
     let mut parser = match UsnParser::from_path(file_location) {
-        Ok(parser) => parser,
+        Ok(parser) => parser.with_configuration(config),
         Err(error) => {
             eprintln!("Error creating parser for {}: {}", file_location, error);
             return;
         }
     };
 
-    for chunk in parser.get_chunk_iterator(){
-        let records = chunk.get_records();
-        for record in records {
-            let json_str = serde_json::to_string(&record).unwrap();
-            println!("{}", json_str);
-        }
+    for record in parser.records(){
+        let json_str = serde_json::to_string(&record).unwrap();
+        println!("{}", json_str);
     }
 }
 
@@ -149,6 +177,6 @@ fn main() {
         eprintln!("directory as a source is not currently implemented.");
         exit(-1);
     } else {
-        process_file(source_location);
+        process_file(source_location, &options);
     }
 }
