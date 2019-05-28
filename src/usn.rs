@@ -123,7 +123,8 @@ pub struct DataChunk {
 
 impl DataChunk {
     pub fn get_records(self) -> Vec<UsnEntry> {
-        debug!("Getting DataChunk at offset: {}", self.offset);
+        trace!("Getting records for ChunkData at offset: {}", self.offset);
+
         let record_iterator = IterRecords::new(
             self.data, 
             self.offset,
@@ -144,10 +145,10 @@ pub struct IterRecords {
 
 impl IterRecords {
     pub fn new(block: Vec<u8>, start_offset: u64, search_size: usize) -> IterRecords {
-        let usn_regex = bytes::Regex::new("..\x00\x00\x02\x00\x00\x00").unwrap();
+        let usn_regex = bytes::Regex::new("(?-u)..\x00\x00\x02\x00\x00\x00").unwrap();
 
         let mut match_offsets: Vec<u64> = Vec::new();
-        for hit in usn_regex.find_iter(&block[..search_size]) {
+        for hit in usn_regex.find_iter(&block[0..search_size]) {
             match_offsets.push(hit.start() as u64);
         }
 
