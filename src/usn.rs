@@ -11,12 +11,12 @@ use crate::ReadSeek;
 use crate::record::UsnEntry;
 
 // This is the size of data chunks
-const SIZE_CHUNK: usize = 5120;
+const SIZE_CHUNK: usize = 17408;
 // This is the size of the search within a chunk
 // It is smaller than the chunk size to garentee that the last record found is complete
 // It has been noticed that generally usn records are paged in 4096 byte pages. I have not
 // observed usn records overlaping the 4096 offset and are zero padded to the 4096 mark.
-const SIZE_SEARCH: usize = 4096;
+const SIZE_SEARCH: usize = 16384;
 
 
 pub struct UsnParserSettings{
