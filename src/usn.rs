@@ -240,7 +240,14 @@ impl IterRecords {
 
         let mut match_offsets: Vec<u64> = Vec::new();
         for hit in usn_regex.find_iter(&block[0..search_size]) {
-            match_offsets.push(hit.start() as u64);
+            let hit_offset = hit.start();
+
+            // The start offset always has to be 8 byte aligned
+            if hit_offset % 8 != 0 {
+                continue;
+            }
+
+            match_offsets.push(hit_offset as u64);
         }
 
         IterRecords {
