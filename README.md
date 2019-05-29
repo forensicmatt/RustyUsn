@@ -14,8 +14,9 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -d, --debug <DEBUG>    Debug level to use. [possible values: Off, Error, Warn, Info, Debug, Trace]
-    -s, --source <PATH>    The source to parse.
+    -d, --debug <DEBUG>        Debug level to use. [possible values: Off, Error, Warn, Info, Debug, Trace]
+    -s, --source <PATH>        The source to parse.
+    -t, --threads <threads>    Sets the number of worker threads, defaults to number of CPU cores. [default: 0]
 ```
 
 ## Output
@@ -24,6 +25,38 @@ Records are written to stdout as jsonl.
 ```
 {"_offset":3272,"record_length":88,"major_version":2,"minor_version":0,"file_reference":{"entry":254303,"sequence":3},"parent_reference":{"entry":174492,"sequence":2},"usn":1231031496,"timestamp":"2018-07-30 19:52:08.147137","reason":"USN_REASON_CLOSE | USN_REASON_DATA_OVERWRITE","source_info":"(empty)","security_id":0,"file_attributes":38,"file_name_length":24,"file_name_offset":60,"file_name":"DEFAULT.LOG2"}
 {"_offset":3184,"record_length":88,"major_version":2,"minor_version":0,"file_reference":{"entry":203911,"sequence":2},"parent_reference":{"entry":174492,"sequence":2},"usn":1231031408,"timestamp":"2018-07-30 19:52:08.147137","reason":"USN_REASON_CLOSE | USN_REASON_DATA_OVERWRITE","source_info":"(empty)","security_id":0,"file_attributes":38,"file_name_length":22,"file_name_offset":60,"file_name":"SYSTEM.LOG1"}
+```
+
+# Carve USN from Unallocated
+To extract unallocated from an image, use the Sleuthkit's `blkls` with the `-A` option and redirect to a file. Pass that file into rusty_usn.exe.
+
+1. Use TSK to extract out unallocated data.
+```
+D:\Tools\sleuthkit-4.6.6-win32\bin>mmls D:\Images\CTF_DEFCON_2018\Image3-Desktop\Desktop-Disk0.e01
+DOS Partition Table
+Offset Sector: 0
+Units are in 512-byte sectors
+
+      Slot      Start        End          Length       Description
+000:  Meta      0000000000   0000000000   0000000001   Primary Table (#0)
+001:  -------   0000000000   0001126399   0001126400   Unallocated
+002:  000:000   0001126400   0103904587   0102778188   NTFS / exFAT (0x07)
+003:  -------   0103904588   0103905279   0000000692   Unallocated
+004:  000:001   0103905280   0104855551   0000950272   Unknown Type (0x27)
+005:  -------   0104855552   0104857599   0000002048   Unallocated
+
+D:\Tools\sleuthkit-4.6.6-win32\bin>blkls -A -o 1126400 D:\Images\CTF_DEFCON_2018\Image3-Desktop\Desktop-Disk0.e01 > D:\Images\CTF_DEFCON_2018\Image3-Desktop\Desktop-Disk0.unallocated
+```
+
+2. Parse the unallocated extracted file with rust_usn.exe.
+```
+D:\Tools\RustyTools>rusty_usn.exe -s D:\Images\CTF_DEFCON_2018\Image3-Desktop\Desktop-Disk0.unallocated > D:\Testing\unallocated-usn.jsonl
+```
+
+3. Count records recovered.
+```
+D:\Tools\RustyTools>rg -U -c "" D:\Testing\unallocated-usn.jsonl
+1558102
 ```
 
 ## Build
