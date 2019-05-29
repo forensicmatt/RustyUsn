@@ -75,8 +75,8 @@ impl UsnRecordV2 {
     /// Parse a raw buffer.
     ///
     /// ```
-    /// extern crate RustyUsn;
-    /// use RustyUsn::record;
+    /// extern crate rusty_usn;
+    /// use rusty_usn::record;
     /// use std::io::Cursor;
     /// # fn test_usn_record_v2() {
     ///     let record_buffer: &[u8] = &[
@@ -101,8 +101,7 @@ impl UsnRecordV2 {
     ///     assert_eq!(record.parent_reference.entry, 141883);
     ///     assert_eq!(record.parent_reference.sequence, 7);
     ///     assert_eq!(record.usn, 20342374400);
-    ///     assert_eq!(record.timestamp.0, 130266586132760403);
-    ///     assert_eq!(format!("{}", record.timestamp), "2013-10-19 12:16:53.276040");
+    ///     assert_eq!(format!("{}", record.timestamp), "2013-10-19 12:16:53.276040 UTC");
     ///     assert_eq!(record.reason.bits(), 2);
     ///     assert_eq!(record.source_info.bits(), 0);
     ///     assert_eq!(record.security_id, 0);

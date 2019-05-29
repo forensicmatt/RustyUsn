@@ -1,7 +1,7 @@
-extern crate RustyUsn;
+extern crate rusty_usn;
 extern crate serde_json;
 use std::io::Cursor;
-use RustyUsn::record;
+use rusty_usn::record;
 
 
 #[test]

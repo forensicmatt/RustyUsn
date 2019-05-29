@@ -1,4 +1,4 @@
-use RustyUsn::usn;
+use rusty_usn::usn;
 
 fn main() {
     let raw_buffer: &[u8] = &[
