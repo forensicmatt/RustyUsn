@@ -1,8 +1,13 @@
 [package]
-name = "RustyUsn"
+name = "rusty_usn"
+description = "A fast and cross platform USN Parser written in Rust that outputs to JSONL"
 version = "1.0.0"
-authors = ["Matthew Seyer <https://github.com/forensicmatt/RustyUsn>"]
+authors = ["Matthew Seyer - Github: https://github.com/forensicmatt - Twitter: @forensic_matt"]
 edition = "2018"
+homepage = "https://github.com/forensicmatt/RustyUsn"
+repository = "https://github.com/forensicmatt/RustyUsn"
+license = "Apache-2.0"
+readme = "README.md"
 
 [dependencies]
 clap = "*"

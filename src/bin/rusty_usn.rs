@@ -7,7 +7,7 @@ use std::path::Path;
 use log::LevelFilter;
 use std::process::exit;
 use clap::{App, Arg, ArgMatches};
-use RustyUsn::usn::{UsnParserSettings, UsnParser};
+use rusty_usn::usn::{UsnParserSettings, UsnParser};
 
 static VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
