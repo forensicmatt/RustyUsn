@@ -50,13 +50,12 @@ fn usn_record_v2_test() {
     assert_eq!(record.record_length, 96);
     assert_eq!(record.major_version, 2);
     assert_eq!(record.minor_version, 0);
-    assert_eq!(record.file_reference_number.entry, 115);
-    assert_eq!(record.file_reference_number.sequence, 37224);
-    assert_eq!(record.parent_file_reference_number.entry, 141883);
-    assert_eq!(record.parent_file_reference_number.sequence, 7);
+    assert_eq!(record.file_reference.entry, 115);
+    assert_eq!(record.file_reference.sequence, 37224);
+    assert_eq!(record.parent_reference.entry, 141883);
+    assert_eq!(record.parent_reference.sequence, 7);
     assert_eq!(record.usn, 20342374400);
-    assert_eq!(record.timestamp.0, 130266586132760403);
-    assert_eq!(format!("{}", record.timestamp), "2013-10-19 12:16:53.276040");
+    assert_eq!(format!("{}", record.timestamp), "2013-10-19 12:16:53.276040 UTC");
     assert_eq!(record.reason.bits(), 2);
     assert_eq!(record.source_info.bits(), 0);
     assert_eq!(record.security_id, 0);

@@ -43,10 +43,11 @@ fn main() {
     let iter = usn::IterRecords::new(
         raw_buffer.iter().cloned().collect(),
         0,
+        raw_buffer.len()
     );
 
     for this in iter {
-        println!("{}", this);
+        println!("{:?}", this);
     }
 
 }
