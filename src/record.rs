@@ -148,8 +148,8 @@ impl UsnRecordV2 {
             );
         }
 
-        let file_reference = MftReference::from_reader(&mut buffer).unwrap();
-        let parent_reference = MftReference::from_reader(&mut buffer).unwrap();
+        let file_reference = MftReference::from_reader(&mut buffer)?;
+        let parent_reference = MftReference::from_reader(&mut buffer)?;
         let usn = buffer.read_u64::<LittleEndian>()?;
         let timestamp = WinTimestamp::new(buffer.read_u64::<LittleEndian>()?);
         let reason = flags::Reason::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);

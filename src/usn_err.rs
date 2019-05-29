@@ -2,6 +2,7 @@ use std::fmt;
 use std::fmt::Display;
 use std::result::Result as StdResult;
 use std::io;
+use winstructs::err::Error as WinstructError;
 
 pub type Result<T> = StdResult<T, UsnError>;
 
@@ -10,6 +11,7 @@ pub enum ErrorKind {
     InvalidRecord,
     InvalidUsnV2Record,
     UnsupportedVersion,
+    WinstructError,
     IoError,
 }
 
@@ -62,6 +64,16 @@ impl UsnError{
 
 impl From<io::Error> for UsnError {
     fn from(err: io::Error) -> Self {
+        UsnError {
+            message: format!("{}",err),
+            kind: ErrorKind::IoError,
+            info: Some(vec![]),
+        }
+    }
+}
+
+impl From<WinstructError> for UsnError {
+    fn from(err: WinstructError) -> Self {
         UsnError {
             message: format!("{}",err),
             kind: ErrorKind::IoError,
