@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::SeekFrom;
 #[cfg(feature = "multithreading")]
 use rayon::prelude::*;
+use byteorder::{ByteOrder, LittleEndian};
 use crate::ReadSeek;
 use crate::record::UsnEntry;
 
@@ -271,14 +272,49 @@ impl Iterator for IterRecords {
             // the entries' absolute offset
             let entry_offset = self.start_offset + start_of_hit;
 
-            // parse record
-            let usn_entry = match UsnEntry::new(
-                entry_offset, 2, 
-                &self.block[start_of_hit as usize ..]
-            ){
-                Ok(record) => record,
-                Err(error) => {
-                    debug!("error at offset {}: {}", entry_offset, error);
+            // validate record length is 8 byte aligned
+            let record_length = LittleEndian::read_u32(&self.block[0..4]);
+            if record_length % 8 != 0 {
+                debug!("not 8 byte aligned at offset {}", entry_offset);
+                continue;
+            }
+
+            // Check versions
+            let major = LittleEndian::read_u16(&self.block[4..6]);
+
+            let usn_entry = match major {
+                2 => {
+                    let minor = LittleEndian::read_u16(&self.block[6..8]);
+
+                    // validate minor version
+                    if minor != 0 {
+                        debug!("minor version does not match major at offset {}", entry_offset);
+                        continue;
+                    }
+
+                    // validate name offset
+                    let name_offset = LittleEndian::read_u16(&self.block[58..60]);
+                    if name_offset != 60 {
+                        debug!("name offset does not match 60 at offset {}", entry_offset);
+                        continue;
+                    }
+
+                    // Parse entry
+                    let entry = match UsnEntry::new(
+                        entry_offset, 2, 
+                        &self.block[start_of_hit as usize ..]
+                    ) {
+                        Ok(entry) => entry,
+                        Err(error) => {
+                            debug!("error at offset {}: {}", entry_offset, error);
+                            continue;
+                        }
+                    };
+
+                    entry
+                },
+                other => {
+                    debug!("Version not handled: {}", other);
                     continue;
                 }
             };
