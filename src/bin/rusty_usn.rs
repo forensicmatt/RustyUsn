@@ -65,7 +65,8 @@ fn set_debug_level(matches: &ArgMatches){
                 Some("Debug") => LevelFilter::Debug,
                 Some("Trace") => LevelFilter::Trace,
                 Some(unknown) => {
-                    panic!("Unknown debug level [{}]", unknown);
+                    eprintln!("Unknown debug level [{}]", unknown);
+                    exit(-1);
                 },
                 None => {
                     LevelFilter::Off
@@ -93,7 +94,10 @@ fn set_debug_level(matches: &ArgMatches){
     // Ensure that logger was dispatched
     match result {
         Ok(_) => trace!("Logging as been initialized!"),
-        Err(error) => panic!("Error initializing fern logging: {}", error)
+        Err(error) => {
+            eprintln!("Error initializing fern logging: {}", error);
+            exit(-1);
+        }
     }
 }
 
@@ -102,7 +106,10 @@ fn is_directory(source: &str)->bool{
     // Check if a source is a directory
     let metadata = match fs::metadata(source) {
         Ok(meta) => meta,
-        Err(error) => panic!("{} does not exists. {}", source, error)
+        Err(error) => {
+            eprintln!("{} does not exists. {}", source, error);
+            exit(-1);
+        }
     };
 
     let file_type = metadata.file_type();
