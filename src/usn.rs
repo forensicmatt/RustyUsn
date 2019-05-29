@@ -240,7 +240,7 @@ impl IterRecords {
         lazy_static! {
             static ref RE_USN: bytes::Regex = bytes::Regex::new(
                 "(?-u)..\x00\x00\x02\x00\x00\x00"
-            ).unwrap();
+            ).expect("Regex Error");
         }
 
         let mut match_offsets: Vec<u64> = Vec::new();
