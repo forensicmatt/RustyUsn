@@ -61,8 +61,8 @@ impl UsnParserSettings {
 
 
 pub struct UsnParser<T: ReadSeek> {
-    _inner_handle: T,
-    _size: u64,
+    inner_handle: T,
+    handle_size: u64,
     settings: UsnParserSettings
 }
 
@@ -85,8 +85,8 @@ impl <T: ReadSeek> UsnParser <T> {
         inner_handle.seek(SeekFrom::Start(0))?;
 
         Ok( Self {
-            _inner_handle: inner_handle,
-            _size: end_offset,
+            inner_handle: inner_handle,
+            handle_size: end_offset,
             settings: UsnParserSettings::default()
         })
     }
@@ -159,7 +159,7 @@ impl <'c, T: ReadSeek> Iterator for IterFileChunks <'c, T> {
     type Item = DataChunk;
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        while self.chunk_start_offset < self.parser._size {
+        while self.chunk_start_offset < self.parser.handle_size {
             // Create buffer for our data chunk
             let mut buffer = vec![0u8; self.chunk_size];
 
@@ -167,7 +167,7 @@ impl <'c, T: ReadSeek> Iterator for IterFileChunks <'c, T> {
             let current_offset = self.chunk_start_offset;
             
             // Seek to where we start our chunk
-            match self.parser._inner_handle.seek(
+            match self.parser.inner_handle.seek(
                 SeekFrom::Start(current_offset)
             ) {
                 Ok(_) => {},
@@ -178,7 +178,7 @@ impl <'c, T: ReadSeek> Iterator for IterFileChunks <'c, T> {
             }
 
             // Read into buffer
-            let _bytes_read = match self.parser._inner_handle.read(
+            let _bytes_read = match self.parser.inner_handle.read(
                 buffer.as_mut_slice()
             ){
                 Ok(bytes_read) => bytes_read,
