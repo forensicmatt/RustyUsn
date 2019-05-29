@@ -1,4 +1,3 @@
-// Logging modules
 #[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;
 #[macro_use] extern crate lazy_static;
@@ -11,7 +10,6 @@ pub mod usn;
 pub mod flags;
 pub mod record;
 pub mod usn_err;
-pub mod timestamp;
 
 use std::io;
 use std::io::{Read, Seek, SeekFrom};

@@ -1,12 +1,13 @@
 use std::io::Read;
 use serde::Serialize;
+use chrono::{DateTime, Utc};
 use encoding::all::UTF_16LE;
 use encoding::{DecoderTrap, Encoding};
 use byteorder::{ReadBytesExt, LittleEndian};
 use winstructs::ntfs::mft_reference::MftReference;
+use winstructs::timestamp::WinTimestamp;
 use crate::flags;
 use crate::usn_err::UsnError;
-use crate::timestamp::WinTimestamp;
 
 #[derive(Serialize, Debug)]
 #[serde(untagged)]
@@ -57,7 +58,7 @@ pub struct UsnRecordV2 {
     pub file_reference: MftReference,
     pub parent_reference: MftReference,
     pub usn: u64,
-    pub timestamp: WinTimestamp,
+    pub timestamp: DateTime<Utc>,
     pub reason: flags::Reason,
     pub source_info: flags::SourceInfo,
     pub security_id: u32,
@@ -151,7 +152,7 @@ impl UsnRecordV2 {
         let file_reference = MftReference::from_reader(&mut buffer)?;
         let parent_reference = MftReference::from_reader(&mut buffer)?;
         let usn = buffer.read_u64::<LittleEndian>()?;
-        let timestamp = WinTimestamp::new(buffer.read_u64::<LittleEndian>()?);
+        let timestamp = WinTimestamp::from_reader(&mut buffer)?.to_datetime();
         let reason = flags::Reason::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
         let source_info = flags::SourceInfo::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
         let security_id = buffer.read_u32::<LittleEndian>()?;
