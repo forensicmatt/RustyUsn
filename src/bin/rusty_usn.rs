@@ -9,7 +9,7 @@ use std::process::exit;
 use clap::{App, Arg, ArgMatches};
 use RustyUsn::usn::{UsnParserSettings, UsnParser};
 
-static VERSION: &'static str = "1.0.0";
+static VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 
 fn is_a_non_negative_number(value: String) -> Result<(), String> {
