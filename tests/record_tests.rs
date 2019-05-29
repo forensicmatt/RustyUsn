@@ -1,5 +1,35 @@
-extern crate rustyusn;
-use rustyusn::usnpkg::usn;
+extern crate rusty_usn;
+extern crate serde_json;
+use std::io::Cursor;
+use rusty_usn::record;
+
+
+#[test]
+fn usn_record_test() {
+    use byteorder::{ReadBytesExt, LittleEndian};
+
+    let record_buffer: &[u8] = &[
+        0x60,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x73,0x00,0x00,0x00,0x00,0x00,0x68,0x91,
+        0x3B,0x2A,0x02,0x00,0x00,0x00,0x07,0x00,0x00,0x00,0x80,0xBC,0x04,0x00,0x00,0x00,
+        0x53,0xC7,0x8B,0x18,0xC5,0xCC,0xCE,0x01,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x20,0x20,0x00,0x00,0x20,0x00,0x3C,0x00,0x42,0x00,0x54,0x00,
+        0x44,0x00,0x65,0x00,0x76,0x00,0x4D,0x00,0x61,0x00,0x6E,0x00,0x61,0x00,0x67,0x00,
+        0x65,0x00,0x72,0x00,0x2E,0x00,0x6C,0x00,0x6F,0x00,0x67,0x00,0x00,0x00,0x00,0x00
+    ];
+
+    let major_version = (&record_buffer[4..6]).read_u16::<LittleEndian>().unwrap();
+
+    let record = match record::UsnRecord::new(major_version, &mut Cursor::new(record_buffer)) {
+        Ok(record) => record,
+        Err(error) => panic!(error)
+    };
+
+    println!("{:?}", record);
+    
+    let json_str = serde_json::to_string(&record).unwrap();
+    println!("{}", json_str);
+}
+
 
 #[test]
 fn usn_record_v2_test() {
@@ -12,7 +42,7 @@ fn usn_record_v2_test() {
         0x65,0x00,0x72,0x00,0x2E,0x00,0x6C,0x00,0x6F,0x00,0x67,0x00,0x00,0x00,0x00,0x00
     ];
 
-    let record = match usn::read_record(record_buffer) {
+    let record = match record::UsnRecordV2::new(&mut Cursor::new(record_buffer)) {
         Ok(record) => record,
         Err(error) => panic!(error)
     };
@@ -20,10 +50,12 @@ fn usn_record_v2_test() {
     assert_eq!(record.record_length, 96);
     assert_eq!(record.major_version, 2);
     assert_eq!(record.minor_version, 0);
-    assert_eq!(record.file_reference_number.0, 10477624533077459059);
-    assert_eq!(record.parent_file_reference_number.0, 1970324837116475);
+    assert_eq!(record.file_reference.entry, 115);
+    assert_eq!(record.file_reference.sequence, 37224);
+    assert_eq!(record.parent_reference.entry, 141883);
+    assert_eq!(record.parent_reference.sequence, 7);
     assert_eq!(record.usn, 20342374400);
-    assert_eq!(record.timestamp.0, 130266586132760403);
+    assert_eq!(format!("{}", record.timestamp), "2013-10-19 12:16:53.276040 UTC");
     assert_eq!(record.reason.bits(), 2);
     assert_eq!(record.source_info.bits(), 0);
     assert_eq!(record.security_id, 0);

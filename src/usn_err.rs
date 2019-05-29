@@ -2,13 +2,16 @@ use std::fmt;
 use std::fmt::Display;
 use std::result::Result as StdResult;
 use std::io;
+use winstructs::err::Error as WinstructError;
 
 pub type Result<T> = StdResult<T, UsnError>;
 
 #[derive(Debug)]
 pub enum ErrorKind {
+    InvalidRecord,
     InvalidUsnV2Record,
     UnsupportedVersion,
+    WinstructError,
     IoError,
 }
 
@@ -24,6 +27,15 @@ pub struct UsnError {
 }
 
 impl UsnError{
+    #[allow(dead_code)]
+    pub fn invalid_length(err: String)->Self{
+        UsnError {
+            message: format!("{}",err),
+            kind: ErrorKind::InvalidRecord,
+            info: Some(vec![]),
+        }
+    }
+
     #[allow(dead_code)]
     pub fn invalid_v2_record(err: String)->Self{
         UsnError {
@@ -52,6 +64,16 @@ impl UsnError{
 
 impl From<io::Error> for UsnError {
     fn from(err: io::Error) -> Self {
+        UsnError {
+            message: format!("{}",err),
+            kind: ErrorKind::IoError,
+            info: Some(vec![]),
+        }
+    }
+}
+
+impl From<WinstructError> for UsnError {
+    fn from(err: WinstructError) -> Self {
         UsnError {
             message: format!("{}",err),
             kind: ErrorKind::IoError,
