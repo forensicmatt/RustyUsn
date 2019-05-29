@@ -1,6 +1,7 @@
 // Logging modules
 #[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;
+#[macro_use] extern crate lazy_static;
 extern crate regex;
 extern crate encoding;
 extern crate byteorder;

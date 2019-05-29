@@ -237,10 +237,14 @@ pub struct IterRecords {
 
 impl IterRecords {
     pub fn new(block: Vec<u8>, start_offset: u64, search_size: usize) -> IterRecords {
-        let usn_regex = bytes::Regex::new("(?-u)..\x00\x00\x02\x00\x00\x00").unwrap();
+        lazy_static! {
+            static ref RE_USN: bytes::Regex = bytes::Regex::new(
+                "(?-u)..\x00\x00\x02\x00\x00\x00"
+            ).unwrap();
+        }
 
         let mut match_offsets: Vec<u64> = Vec::new();
-        for hit in usn_regex.find_iter(&block[0..search_size]) {
+        for hit in RE_USN.find_iter(&block[0..search_size]) {
             let hit_offset = hit.start();
 
             // The start offset always has to be 8 byte aligned
