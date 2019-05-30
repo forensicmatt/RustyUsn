@@ -32,9 +32,9 @@ impl UsnRecord {
 #[derive(Serialize, Debug)]
 pub struct UsnEntry {
     #[serde(rename="_offset")]
-    offset: u64,
+    pub offset: u64,
     #[serde(flatten)]
-    record: UsnRecord,
+    pub record: UsnRecord,
 }
 impl UsnEntry {
     pub fn new<R: Read>(offset: u64, version: u16, mut reader: R)-> Result<UsnEntry, UsnError>{
