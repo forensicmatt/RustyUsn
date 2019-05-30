@@ -206,6 +206,66 @@ impl <'c, T: ReadSeek> Iterator for IterFileChunks <'c, T> {
     }
 }
 
+
+pub struct IntoIterFileChunks<T: ReadSeek> {
+    parser: UsnParser<T>,
+    chunk_size: usize,
+    search_size: usize,
+    chunk_start_offset: u64,
+}
+
+impl<T: ReadSeek> Iterator for IntoIterFileChunks<T> {
+    type Item = DataChunk;
+    
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        while self.chunk_start_offset < self.parser.handle_size {
+            // Create buffer for our data chunk
+            let mut buffer = vec![0u8; self.chunk_size];
+
+            // Get the current offset
+            let current_offset = self.chunk_start_offset;
+            
+            // Seek to where we start our chunk
+            match self.parser.inner_handle.seek(
+                SeekFrom::Start(current_offset)
+            ) {
+                Ok(_) => {},
+                Err(error) => {
+                    error!("{}", error);
+                    break;
+                }
+            }
+
+            // Read into buffer
+            let _bytes_read = match self.parser.inner_handle.read(
+                buffer.as_mut_slice()
+            ){
+                Ok(bytes_read) => bytes_read,
+                Err(error) => {
+                    error!("{}", error);
+                    return None
+                }
+            };
+
+            // Set the next chunk's offset
+            // Increment by search size and not chunk size
+            self.chunk_start_offset += self.search_size as u64;
+
+            // Return data chunk
+            return Some(
+                DataChunk{
+                    offset: current_offset,
+                    search_size: self.search_size,
+                    data: buffer
+                }
+            );
+        }
+        
+        None
+    }
+}
+
+
 #[derive(Debug)]
 pub struct DataChunk {
     offset: u64,
