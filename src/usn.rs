@@ -105,6 +105,15 @@ impl <T: ReadSeek> UsnParser <T> {
         }
     }
 
+    pub fn into_chunk_iterator(self) -> IntoIterFileChunks<T> {
+        IntoIterFileChunks {
+            parser: self,
+            chunk_size: SIZE_CHUNK,
+            search_size: SIZE_SEARCH,
+            chunk_start_offset: 0,
+        }
+    }
+
     pub fn records(&mut self) -> impl Iterator<Item = UsnEntry> + '_ {
         let num_threads = max(self.settings.thread_count, 1);
 
