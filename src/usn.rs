@@ -286,15 +286,19 @@ impl DataChunk {
     pub fn get_records(self) -> Vec<UsnEntry> {
         trace!("Getting records for ChunkData at offset: {}", self.offset);
 
-        let record_iterator = IterRecords::new(
-            self.data, 
-            self.offset,
-            self.search_size
-        );
+        let record_iterator = self.get_record_iterator();
 
         let records: Vec<UsnEntry> = record_iterator.collect();
 
         return records;
+    }
+
+    pub fn get_record_iterator(self) -> IterRecords {
+        IterRecords::new(
+            self.data, 
+            self.offset,
+            self.search_size
+        )
     }
 }
 
