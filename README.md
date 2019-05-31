@@ -1,5 +1,10 @@
+[![Build Status](https://dev.azure.com/matthewseyer/matthewseyer/_apis/build/status/forensicmatt.RustyUsn?branchName=master&jobName=Job&configuration=Job%20windows-stable)](https://dev.azure.com/matthewseyer/matthewseyer/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/matthewseyer/matthewseyer/_apis/build/status/forensicmatt.RustyUsn?branchName=master&jobName=Job&configuration=Job%20linux-stable)](https://dev.azure.com/matthewseyer/matthewseyer/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/matthewseyer/matthewseyer/_apis/build/status/forensicmatt.RustyUsn?branchName=master&jobName=Job&configuration=Job%20mac-stable)](https://dev.azure.com/matthewseyer/matthewseyer/_build/latest?definitionId=1&branchName=master)
 # RustyUsn
 A fast and cross platform USN Parser written in Rust. Output is [JSONL](http://jsonlines.org/).
+
+This does not currently implement records for usn record version 3 and 4.
 
 ```
 rusty_usn 1.0.0
