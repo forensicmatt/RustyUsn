@@ -25,7 +25,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .short("s")
         .long("source")
         .value_name("PATH")
-        .help("The source to parse.")
+        .help("The source to parse. If the source is a directory, the directoy will be recursed looking for any files that end with '$J'.")
         .takes_value(true);
 
     let thread_count = Arg::with_name("threads")
@@ -46,7 +46,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
     App::new("rusty_usn")
         .version(VERSION)
         .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
-        .about("USN Parser written in Rust.")
+        .about("USN Parser written in Rust. Output is JSONL.")
         .arg(source_arg)
         .arg(thread_count)
         .arg(verbose)
@@ -117,6 +117,31 @@ fn is_directory(source: &str)->bool{
 }
 
 
+fn process_directory(directory: &str, options: &ArgMatches) {
+    for dir_reader in fs::read_dir(directory) {
+        for entry_result in dir_reader {
+            match entry_result {
+                Ok(entry) => {
+                    let path = entry.path();
+                    if path.is_file() {
+                        let path_string = path.into_os_string().into_string().unwrap();
+                        if path_string.to_lowercase().ends_with("$j"){
+                            process_file(&path_string, &options);
+                        }
+                    } else if path.is_dir(){
+                        let path_string = path.into_os_string().into_string().unwrap();
+                        process_directory(&path_string, &options);
+                    }
+                },
+                Err(error) => {
+                    eprintln!("Error reading {} [{:?}]", directory, error);
+                }
+            }
+        }
+    }
+}
+
+
 fn process_file(file_location: &str, options: &ArgMatches) {
     info!("processing {}", file_location);
 
@@ -181,8 +206,7 @@ fn main() {
     };
 
     if is_directory(source_location) {
-        eprintln!("directory as a source is not currently implemented.");
-        exit(-1);
+        process_directory(source_location, &options);
     } else {
         process_file(source_location, &options);
     }

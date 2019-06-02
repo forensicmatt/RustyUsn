@@ -41,6 +41,7 @@ fn main() {
     ];
 
     let iter = usn::IterRecords::new(
+        String::from("Test source"),
         raw_buffer.iter().cloned().collect(),
         0,
         raw_buffer.len()

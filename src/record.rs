@@ -31,16 +31,19 @@ impl UsnRecord {
 
 #[derive(Serialize, Debug)]
 pub struct UsnEntry {
+    #[serde(rename="_source")]
+    pub source: String,
     #[serde(rename="_offset")]
     pub offset: u64,
     #[serde(flatten)]
     pub record: UsnRecord,
 }
 impl UsnEntry {
-    pub fn new<R: Read>(offset: u64, version: u16, mut reader: R)-> Result<UsnEntry, UsnError>{
+    pub fn new<R: Read>(source: String, offset: u64, version: u16, mut reader: R)-> Result<UsnEntry, UsnError>{
         let record = UsnRecord::new(version, &mut reader)?;
 
         Ok(UsnEntry {
+            source: source,
             offset: offset,
             record: record,
         })

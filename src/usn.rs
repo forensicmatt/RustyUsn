@@ -62,6 +62,7 @@ impl UsnParserSettings {
 
 pub struct UsnParser<T: ReadSeek> {
     inner_handle: T,
+    source: String,
     handle_size: u64,
     settings: UsnParserSettings
 }
@@ -71,13 +72,14 @@ impl UsnParser<File> {
         let file_handle = File::open(filename)?;
 
         Self::from_read_seek(
+            filename.to_string(),
             file_handle
         )
     }
 }
 
 impl <T: ReadSeek> UsnParser <T> {
-    pub fn from_read_seek(mut inner_handle: T) -> Result<Self, io::Error> {
+    pub fn from_read_seek(source: String, mut inner_handle: T) -> Result<Self, io::Error> {
         // We need to get the end offset to determine the size
         let end_offset = inner_handle.seek(SeekFrom::End(0))?;
 
@@ -86,6 +88,7 @@ impl <T: ReadSeek> UsnParser <T> {
 
         Ok( Self {
             inner_handle: inner_handle,
+            source: source,
             handle_size: end_offset,
             settings: UsnParserSettings::default()
         })
@@ -204,6 +207,7 @@ impl <'c, T: ReadSeek> Iterator for IterFileChunks <'c, T> {
             // Return data chunk
             return Some(
                 DataChunk{
+                    source: self.parser.source.to_owned(),
                     offset: current_offset,
                     search_size: self.search_size,
                     data: buffer
@@ -263,6 +267,7 @@ impl<T: ReadSeek> Iterator for IntoIterFileChunks<T> {
             // Return data chunk
             return Some(
                 DataChunk{
+                    source: self.parser.source.to_owned(),
                     offset: current_offset,
                     search_size: self.search_size,
                     data: buffer
@@ -277,6 +282,7 @@ impl<T: ReadSeek> Iterator for IntoIterFileChunks<T> {
 
 #[derive(Debug)]
 pub struct DataChunk {
+    source: String,
     offset: u64,
     search_size: usize,
     data: Vec<u8>
@@ -295,6 +301,7 @@ impl DataChunk {
 
     pub fn get_record_iterator(self) -> IterRecords {
         IterRecords::new(
+            self.source,
             self.data, 
             self.offset,
             self.search_size
@@ -303,13 +310,14 @@ impl DataChunk {
 }
 
 pub struct IterRecords {
+    source: String,
     block: Vec<u8>,
     start_offset: u64,
     match_offsets: Vec<u64>,
 }
 
 impl IterRecords {
-    pub fn new(block: Vec<u8>, start_offset: u64, search_size: usize) -> IterRecords {
+    pub fn new(source: String, block: Vec<u8>, start_offset: u64, search_size: usize) -> IterRecords {
         lazy_static! {
             static ref RE_USN: bytes::Regex = bytes::Regex::new(
                 "(?-u)..\x00\x00\x02\x00\x00\x00"
@@ -329,6 +337,7 @@ impl IterRecords {
         }
 
         IterRecords {
+            source,
             block,
             start_offset,
             match_offsets
@@ -378,7 +387,9 @@ impl Iterator for IterRecords {
 
                     // Parse entry
                     let entry = match UsnEntry::new(
-                        entry_offset, 2, 
+                        self.source.clone(),
+                        entry_offset, 
+                        2,
                         &self.block[start_of_hit as usize ..]
                     ) {
                         Ok(entry) => entry,
