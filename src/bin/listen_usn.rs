@@ -23,6 +23,11 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .help("The source volume to listen to. (ie '\\\\.\\C:'")
         .takes_value(true);
 
+    let historical_arg = Arg::with_name("historical")
+        .short("p")
+        .long("historical")
+        .help("List historical records along with listening to new changes.");
+
     let verbose = Arg::with_name("debug")
         .short("-d")
         .long("debug")
@@ -36,6 +41,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
         .about("USN listener written in Rust. Output is JSONL.")
         .arg(source_arg)
+        .arg(historical_arg)
         .arg(verbose)
 }
 
@@ -89,13 +95,16 @@ fn set_debug_level(matches: &ArgMatches){
 }
 
 
-fn process_volume(volume_str: &str, _options: &ArgMatches) {
+fn process_volume(volume_str: &str, options: &ArgMatches) {
     info!("listening on {}", volume_str);
+
+    let historical_flag = options.is_present("historical");
 
     let (tx, rx): (Sender<UsnEntry>, Receiver<UsnEntry>) = mpsc::channel();
 
     let volume_listener = UsnVolumeListener::new(
         volume_str.to_string(),
+        historical_flag,
         tx.clone()
     );
 
