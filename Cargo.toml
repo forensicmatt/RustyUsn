@@ -37,3 +37,6 @@ multithreading = ["rayon"]
 
 [[bin]]
 name = "rusty_usn"
+
+[[bin]]
+name = "listen_usn"

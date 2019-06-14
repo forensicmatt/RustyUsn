@@ -1,3 +1,4 @@
+#![cfg(windows)]
 #[macro_use]
 extern crate log;
 extern crate clap;
