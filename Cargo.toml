@@ -24,6 +24,13 @@ byteorder = "1.3.1"
 winstructs = "0.2.0"
 rayon = {version = "1.0.3", optional = true}
 
+[dependencies.winapi]
+version = "0.3"
+features = [
+"winioctl",
+"ioapiset"
+]
+
 [features]
 default = ["multithreading"]
 multithreading = ["rayon"]
