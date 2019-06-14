@@ -3,12 +3,8 @@ use std::ptr;
 use std::mem;
 use std::fs::File;
 use winapi::um::winioctl::{
-    FSCTL_GET_NTFS_FILE_RECORD,
-    FSCTL_GET_NTFS_VOLUME_DATA,
     FSCTL_QUERY_USN_JOURNAL,
     FSCTL_READ_USN_JOURNAL,
-    NTFS_FILE_RECORD_INPUT_BUFFER,
-    NTFS_FILE_RECORD_OUTPUT_BUFFER,
 };
 use winapi::ctypes::c_void;
 use winapi::shared::ntstatus;
@@ -53,6 +49,14 @@ impl UsnJournalData {
                     Error::invalid_usn_journal_data(other)
                 );
             }
+        }
+    }
+
+    pub fn get_next_usn(&self) -> u64 {
+        match self {
+            UsnJournalData::V0(jd) => jd.next_usn,
+            UsnJournalData::V1(jd) => jd.next_usn,
+            UsnJournalData::V2(jd) => jd.next_usn,
         }
     }
 }
