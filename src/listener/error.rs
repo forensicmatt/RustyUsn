@@ -1,4 +1,3 @@
-#![cfg(windows)]
 use std::ptr;
 use std::string;
 use winapi::shared::ntdef::WCHAR;

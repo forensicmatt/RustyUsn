@@ -1,4 +1,3 @@
-#![cfg(windows)]
 use std::thread;
 use std::fs::File;
 use std::process::exit;

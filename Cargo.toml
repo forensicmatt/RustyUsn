@@ -30,13 +30,16 @@ features = [
 "winioctl",
 "ioapiset"
 ]
+optional = true
 
 [features]
 default = ["multithreading"]
 multithreading = ["rayon"]
+windows = ["winapi"]
 
 [[bin]]
 name = "rusty_usn"
 
 [[bin]]
 name = "listen_usn"
+required-features = ["windows"]

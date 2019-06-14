@@ -1,4 +1,3 @@
-#![cfg(windows)]
 #[macro_use]
 extern crate log;
 extern crate clap;
@@ -13,7 +12,6 @@ use std::sync::mpsc::{Sender, Receiver};
 use rusty_usn::listener::listener::UsnVolumeListener;
 
 static VERSION: &'static str = env!("CARGO_PKG_VERSION");
-
 
 
 fn make_app<'a, 'b>() -> App<'a, 'b> {

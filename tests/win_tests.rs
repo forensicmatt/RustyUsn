@@ -1,11 +1,13 @@
 extern crate rusty_usn;
 use std::fs::File;
-use rusty_usn::listener::winfuncs::{
-    query_usn_journal
-};
 
+#[cfg(feature = "windows")]
 #[test]
 fn query_test() {
+    use rusty_usn::listener::winfuncs::{
+        query_usn_journal
+    };
+
     let file_handle = match File::open("\\\\.\\C:") {
         Ok(handle) => handle,
         Err(error) => panic!(error)

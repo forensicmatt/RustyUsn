@@ -1,4 +1,3 @@
-#![cfg(windows)]
 use std::ptr;
 use std::mem;
 use std::fs::File;
