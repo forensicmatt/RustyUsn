@@ -10,6 +10,7 @@ pub mod usn;
 pub mod flags;
 pub mod record;
 pub mod usn_err;
+pub mod listener;
 
 use std::io;
 use std::io::{Read, Seek, SeekFrom};

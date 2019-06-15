@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::SeekFrom;
 #[cfg(feature = "multithreading")]
 use rayon::prelude::*;
+use std::collections::VecDeque;
 use byteorder::{ByteOrder, LittleEndian};
 use crate::ReadSeek;
 use crate::record::UsnEntry;
@@ -18,6 +19,12 @@ const SIZE_CHUNK: usize = 17408;
 // It has been noticed that generally usn records are paged in 4096 byte pages. I have not
 // observed usn records overlaping the 4096 offset and are zero padded to the 4096 mark.
 const SIZE_SEARCH: usize = 16384;
+
+lazy_static! {
+    static ref RE_USN: bytes::Regex = bytes::Regex::new(
+        "(?-u)..\x00\x00\x02\x00\x00\x00"
+    ).expect("Regex Error");
+}
 
 
 pub struct UsnParserSettings{
@@ -309,32 +316,19 @@ impl DataChunk {
     }
 }
 
+#[derive(Debug)]
 pub struct IterRecords {
     source: String,
     block: Vec<u8>,
     start_offset: u64,
-    match_offsets: Vec<u64>,
+    match_offsets: VecDeque<u64>,
 }
 
 impl IterRecords {
     pub fn new(source: String, block: Vec<u8>, start_offset: u64, search_size: usize) -> IterRecords {
-        lazy_static! {
-            static ref RE_USN: bytes::Regex = bytes::Regex::new(
-                "(?-u)..\x00\x00\x02\x00\x00\x00"
-            ).expect("Regex Error");
-        }
-
-        let mut match_offsets: Vec<u64> = Vec::new();
-        for hit in RE_USN.find_iter(&block[0..search_size]) {
-            let hit_offset = hit.start();
-
-            // The start offset always has to be 8 byte aligned
-            if hit_offset % 8 != 0 {
-                continue;
-            }
-
-            match_offsets.push(hit_offset as u64);
-        }
+        let match_offsets: VecDeque<u64> = RE_USN.find_iter(&block[0..search_size])
+            .map(|m| m.start() as u64)
+            .collect();
 
         IterRecords {
             source,
@@ -350,27 +344,30 @@ impl Iterator for IterRecords {
 
     fn next(&mut self) -> Option<UsnEntry> {
         loop {
-            let start_of_hit = match self.match_offsets.pop(){
+            // start of hit
+            let start_of_hit = match self.match_offsets.pop_front(){
                 Some(offset) => offset,
                 None => break
             };
+            // index starts at start of hit offset
+            let i = start_of_hit as usize;
 
             // the entries' absolute offset
             let entry_offset = self.start_offset + start_of_hit;
 
             // validate record length is 8 byte aligned
-            let record_length = LittleEndian::read_u32(&self.block[0..4]);
+            let record_length = LittleEndian::read_u32(&self.block[i..i+4]);
             if record_length % 8 != 0 {
                 debug!("not 8 byte aligned at offset {}", entry_offset);
                 continue;
             }
 
             // Check versions
-            let major = LittleEndian::read_u16(&self.block[4..6]);
+            let major = LittleEndian::read_u16(&self.block[i+4..i+6]);
 
             let usn_entry = match major {
                 2 => {
-                    let minor = LittleEndian::read_u16(&self.block[6..8]);
+                    let minor = LittleEndian::read_u16(&self.block[i+6..i+8]);
 
                     // validate minor version
                     if minor != 0 {
@@ -379,7 +376,7 @@ impl Iterator for IterRecords {
                     }
 
                     // validate name offset
-                    let name_offset = LittleEndian::read_u16(&self.block[58..60]);
+                    let name_offset = LittleEndian::read_u16(&self.block[i+58..i+60]);
                     if name_offset != 60 {
                         debug!("name offset does not match 60 at offset {}", entry_offset);
                         continue;
@@ -402,7 +399,7 @@ impl Iterator for IterRecords {
                     entry
                 },
                 other => {
-                    debug!("Version not handled: {}", other);
+                    debug!("Version not handled: {}; offset: {}", other, entry_offset);
                     continue;
                 }
             };

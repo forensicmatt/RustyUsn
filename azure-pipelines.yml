@@ -34,10 +34,21 @@ steps:
       echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
     displayName: Windows install rust
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+  - script: cargo build --all-features --release
+    displayName: Cargo build Windows_NT
+    condition: eq( variables['Agent.OS'], 'Windows_NT' )
   - script: cargo build --release
-    displayName: Cargo build
+    displayName: Cargo build NOT Windows_NT
+    condition: ne( variables['Agent.OS'], 'Windows_NT' )
+
+  - script: cargo test --all-features
+    displayName: Cargo test Windows_NT
+    condition: eq( variables['Agent.OS'], 'Windows_NT' )
   - script: cargo test
-    displayName: Cargo test
+    displayName: Cargo test NOT Windows_NT
+    condition: ne( variables['Agent.OS'], 'Windows_NT' )
+
   - bash: |
       MY_TAG="$(Build.SourceBranch)"
       MY_TAG=${MY_TAG#refs/tags/}
@@ -51,28 +62,51 @@ steps:
 
   - bash: |
       echo "##vso[task.setvariable variable=build.binary_name]rusty_usn.exe"
-    displayName: "Create date variable"
+    displayName: "Create rusty_usn variable (Windows_NT)"
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
-
   - bash: |
       echo "##vso[task.setvariable variable=build.binary_name]rusty_usn"
-    displayName: "Create date variable"
+    displayName: "Create rusty_usn variable (NOT Windows_NT)"
     condition: ne( variables['Agent.OS'], 'Windows_NT' )
 
+  - bash: |
+      echo "##vso[task.setvariable variable=build.binary_name2]listen_usn.exe"
+    displayName: "Create listen_usn variable (Windows_NT)"
+    condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
   - task: CopyFiles@2
-    displayName: Copy assets
+    displayName: Copy rusty_usn
     inputs:
       sourceFolder: '$(Build.SourcesDirectory)/target/release'
       contents: |
         $(build.binary_name)
-      targetFolder: '$(Build.BinariesDirectory)/$(build.binary_name)'
-  - task: ArchiveFiles@2
-    displayName: Gather assets
+      targetFolder: '$(Build.BinariesDirectory)'
+
+  - task: CopyFiles@2
+    displayName: Copy listen_usn
     inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)/$(build.binary_name)'
+      sourceFolder: '$(Build.SourcesDirectory)/target/release'
+      contents: |
+        $(build.binary_name2)
+      targetFolder: '$(Build.BinariesDirectory)'
+      condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+  - task: ArchiveFiles@2
+    displayName: Gather assets (Not Windows)
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)'
       archiveType: 'tar'
       tarCompression: 'gz'
       archiveFile: '$(Build.ArtifactStagingDirectory)/rusty_usn-$(build.my_tag)-$(TARGET).tar.gz'
+    condition: ne( variables['Agent.OS'], 'Windows_NT' )
+  - task: ArchiveFiles@2
+    displayName: Gather assets (Windows)
+    inputs:
+      rootFolderOrFile: '$(Build.BinariesDirectory)'
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/rusty_usn-$(build.my_tag)-$(TARGET).zip'
+    condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
   - task: GithubRelease@0
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     inputs:

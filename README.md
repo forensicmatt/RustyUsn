@@ -2,7 +2,10 @@
 # RustyUsn
 A fast and cross platform USN Parser written in Rust. Output is [JSONL](http://jsonlines.org/).
 
-This does not currently implement records for usn record version 3 and 4.
+# Tools
+There are currently two tools associated with this package. rusty_usn and listen_usn. Neither currently implement records for usn record version 3 and 4.
+
+## rust_usn
 
 ```
 rusty_usn 1.1.0
@@ -23,13 +26,39 @@ OPTIONS:
     -t, --threads <threads>    Sets the number of worker threads, defaults to number of CPU cores. [default: 0]
 ```
 
-## Output
+### Output
 Records are written to stdout as jsonl.
 
 ```
 {"_source":"D:\\Images\\CTF_DEFCON_2018\\Image3-Desktop\\KAPE\\E\\$Extend\\$J","_offset":34464,"record_length":88,"major_version":2,"minor_version":0,"file_reference":{"entry":114704,"sequence":2},"parent_reference":{"entry":202493,"sequence":3},"usn":1231062688,"timestamp":"2018-07-30T20:15:57.100221Z","reason":"USN_REASON_DATA_OVERWRITE","source_info":"(empty)","security_id":0,"file_attributes":32,"file_name_length":24,"file_name_offset":60,"file_name":"settings.dat"}
 {"_source":"D:\\Images\\CTF_DEFCON_2018\\Image3-Desktop\\KAPE\\E\\$Extend\\$J","_offset":34368,"record_length":96,"major_version":2,"minor_version":0,"file_reference":{"entry":114893,"sequence":2},"parent_reference":{"entry":202493,"sequence":3},"usn":1231062592,"timestamp":"2018-07-30T20:15:57.100221Z","reason":"USN_REASON_DATA_OVERWRITE","source_info":"(empty)","security_id":0,"file_attributes":38,"file_name_length":34,"file_name_offset":60,"file_name":"settings.dat.LOG1"}
 ```
+
+## listen_usn
+A tool that uses the Windows API to listen to USN changes for a given volume in real-time. Output is JSONL. Note 
+that this tools requires the "windows" feature (which is not on by default) to be built. This is required for the build 
+process to complete on non-windows platforms. (see the **build** section of this README)
+
+Also note, the _offset field in output is currently the value of the buffer returned by the Windows API. Don't be supprised to see lots of the same offset for this tool's output.
+
+```
+listen_usn 0.1.0
+Matthew Seyer <https://github.com/forensicmatt/RustyUsn>
+USN listener written in Rust. Output is JSONL.
+
+USAGE:
+    listen_usn.exe [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help          Prints help information
+    -p, --historical    List historical records along with listening to new changes.
+    -V, --version       Prints version information
+
+OPTIONS:
+    -d, --debug <DEBUG>    Debug level to use. [possible values: Off, Error, Warn, Info, Debug, Trace]
+    -s, --source <PATH>    The source volume to listen to. (example: '\\.\C:')
+```
+
 
 # Carve USN from Unallocated
 To extract unallocated from an image, use the Sleuthkit's `blkls` with the `-A` option and redirect to a file. Pass that file into rusty_usn.exe.
@@ -64,14 +93,6 @@ D:\Tools\RustyTools>rg -U -c "" D:\Testing\unallocated-usn.jsonl
 ```
 
 ## Build
-All you need is a ```cargo build --release``` for compiling with Rust. Currently using Rust 1.36.0 Nightly.
+If you are building on windows and want `listen_usn.exe` you will need to build with the `windows` feature as it is not on by default. Use: `cargo build --all-features --release` for compiling with Rust in Windows. Use `cargo build --release` for non-Windows systems.
 
-# Change Log
-## [1.1.0] - 2019-06-01
-### Added
- - `_source` to output
- - directory processing
-
-## [1.0.0] - 2019-05-27
-### Changed
-- Rewrite and removal of features
+Currently using Rust 1.36.0 Nightly.
