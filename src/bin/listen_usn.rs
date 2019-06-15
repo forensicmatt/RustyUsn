@@ -11,7 +11,7 @@ use clap::{App, Arg, ArgMatches};
 use std::sync::mpsc::{Sender, Receiver};
 use rusty_usn::listener::listener::UsnVolumeListener;
 
-static VERSION: &'static str = env!("CARGO_PKG_VERSION");
+static VERSION: &'static str = "0.1.0";
 
 
 fn make_app<'a, 'b>() -> App<'a, 'b> {
@@ -19,7 +19,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .short("s")
         .long("source")
         .value_name("PATH")
-        .help("The source volume to listen to. (ie '\\\\.\\C:'")
+        .help("The source volume to listen to. (example: '\\\\.\\C:')")
         .takes_value(true);
 
     let historical_arg = Arg::with_name("historical")
