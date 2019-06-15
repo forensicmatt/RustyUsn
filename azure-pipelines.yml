@@ -92,7 +92,7 @@ steps:
       condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
   - task: ArchiveFiles@2
-    displayName: Gather assets (Not Windows)
+    displayName: Gather assets (Non-Windows)
     inputs:
       rootFolderOrFile: '$(Build.BinariesDirectory)'
       archiveType: 'tar'
@@ -108,7 +108,8 @@ steps:
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
   - task: GithubRelease@0
-    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    displayName: Add GithubRelease (Non-Windows)
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), ne( variables['Agent.OS'], 'Windows_NT' ))
     inputs:
       gitHubConnection: 'Github'
       repositoryName: 'forensicmatt/RustyUsn'
@@ -117,6 +118,20 @@ steps:
       tagSource: 'manual'
       tag: '$(build.my_tag)'
       assets: '$(Build.ArtifactStagingDirectory)/rusty_usn-$(build.my_tag)-$(TARGET).tar.gz'
+      title: '$(build.my_tag) - $(build.date)'
+      assetUploadMode: 'replace'
+      addChangeLog: false
+  - task: GithubRelease@0
+    displayName: Add GithubRelease (Windows)
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq( variables['Agent.OS'], 'Windows_NT' ))
+    inputs:
+      gitHubConnection: 'Github'
+      repositoryName: 'forensicmatt/RustyUsn'
+      action: 'edit'
+      target: '$(build.sourceVersion)'
+      tagSource: 'manual'
+      tag: '$(build.my_tag)'
+      assets: '$(Build.ArtifactStagingDirectory)/rusty_usn-$(build.my_tag)-$(TARGET).zip'
       title: '$(build.my_tag) - $(build.date)'
       assetUploadMode: 'replace'
       addChangeLog: false
