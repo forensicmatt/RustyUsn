@@ -65,7 +65,7 @@ pub struct UsnRecordV2 {
     pub reason: flags::Reason,
     pub source_info: flags::SourceInfo,
     pub security_id: u32,
-    pub file_attributes: u32,
+    pub file_attributes: flags::FileAttributes,
     pub file_name_length: u16,
     pub file_name_offset: u16,
     pub file_name: String
@@ -158,7 +158,7 @@ impl UsnRecordV2 {
         let reason = flags::Reason::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
         let source_info = flags::SourceInfo::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
         let security_id = buffer.read_u32::<LittleEndian>()?;
-        let file_attributes = buffer.read_u32::<LittleEndian>()?;
+        let file_attributes = flags::FileAttributes::from_bits_truncate(buffer.read_u32::<LittleEndian>()?);
         let file_name_length = buffer.read_u16::<LittleEndian>()?;
         let file_name_offset = buffer.read_u16::<LittleEndian>()?;
 

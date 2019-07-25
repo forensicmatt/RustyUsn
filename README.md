@@ -8,7 +8,7 @@ There are currently two tools associated with this package. rusty_usn and listen
 ## rust_usn
 
 ```
-rusty_usn 1.1.0
+rusty_usn 1.2.0
 Matthew Seyer <https://github.com/forensicmatt/RustyUsn>
 USN Parser written in Rust. Output is JSONL.
 
@@ -21,17 +21,19 @@ FLAGS:
 
 OPTIONS:
     -d, --debug <DEBUG>        Debug level to use. [possible values: Off, Error, Warn, Info, Debug, Trace]
+    -m, --mft <MFT>            The MFT to use for creating folder mapping.
     -s, --source <PATH>        The source to parse. If the source is a directory, the directoy will be recursed looking
-                               for any files that end with '$J'.
-    -t, --threads <threads>    Sets the number of worker threads, defaults to number of CPU cores. [default: 0]
+                               for any files that end with '$J'. (Do not use a directory if using an MFT file.)
+    -t, --threads <threads>    Sets the number of worker threads, defaults to number of CPU cores. If the --mft option
+                               is used, the tool can only run single threaded. [default: 0]
 ```
 
 ### Output
 Records are written to stdout as jsonl.
 
 ```
-{"_source":"D:\\Images\\CTF_DEFCON_2018\\Image3-Desktop\\KAPE\\E\\$Extend\\$J","_offset":34464,"record_length":88,"major_version":2,"minor_version":0,"file_reference":{"entry":114704,"sequence":2},"parent_reference":{"entry":202493,"sequence":3},"usn":1231062688,"timestamp":"2018-07-30T20:15:57.100221Z","reason":"USN_REASON_DATA_OVERWRITE","source_info":"(empty)","security_id":0,"file_attributes":32,"file_name_length":24,"file_name_offset":60,"file_name":"settings.dat"}
-{"_source":"D:\\Images\\CTF_DEFCON_2018\\Image3-Desktop\\KAPE\\E\\$Extend\\$J","_offset":34368,"record_length":96,"major_version":2,"minor_version":0,"file_reference":{"entry":114893,"sequence":2},"parent_reference":{"entry":202493,"sequence":3},"usn":1231062592,"timestamp":"2018-07-30T20:15:57.100221Z","reason":"USN_REASON_DATA_OVERWRITE","source_info":"(empty)","security_id":0,"file_attributes":38,"file_name_length":34,"file_name_offset":60,"file_name":"settings.dat.LOG1"}
+{"_offset":40018936,"_source":"C:\\Test\\$UsnJrnl.J","file_attributes":"FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM","file_name":"lastalive0.dat","file_name_length":28,"file_name_offset":60,"file_reference":{"entry":61346,"sequence":10},"full_name":"[root]/Windows/ServiceProfiles/LocalService/AppData/Local/lastalive0.dat","major_version":2,"minor_version":0,"parent_reference":{"entry":83529,"sequence":2},"reason":"USN_REASON_CLOSE | USN_REASON_DATA_EXTEND | USN_REASON_DATA_TRUNCATION","record_length":88,"security_id":0,"source_info":"(empty)","timestamp":"2019-03-20T21:35:52.322741Z","usn":558015480}
+{"_offset":40018848,"_source":"C:\\Test\\$UsnJrnl.J","file_attributes":"FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM","file_name":"lastalive0.dat","file_name_length":28,"file_name_offset":60,"file_reference":{"entry":61346,"sequence":10},"full_name":"[root]/Windows/ServiceProfiles/LocalService/AppData/Local/lastalive0.dat","major_version":2,"minor_version":0,"parent_reference":{"entry":83529,"sequence":2},"reason":"USN_REASON_DATA_EXTEND | USN_REASON_DATA_TRUNCATION","record_length":88,"security_id":0,"source_info":"(empty)","timestamp":"2019-03-20T21:35:52.322741Z","usn":558015392}
 ```
 
 ## listen_usn

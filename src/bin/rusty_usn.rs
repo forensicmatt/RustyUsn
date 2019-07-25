@@ -6,10 +6,15 @@ use std::fs;
 use std::path::Path;
 use log::LevelFilter;
 use std::process::exit;
+use serde_json::value::Value;
 use clap::{App, Arg, ArgMatches};
+use rusty_usn::mapping::FolderMapping;
 use rusty_usn::usn::{UsnParserSettings, UsnParser};
+use rusty_usn::record::UsnEntry;
+use rusty_usn::record::UsnRecord;
+use rusty_usn::flags;
 
-static VERSION: &'static str = "1.1.0";
+static VERSION: &'static str = "1.2.0";
 
 
 fn is_a_non_negative_number(value: String) -> Result<(), String> {
@@ -25,7 +30,16 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .short("s")
         .long("source")
         .value_name("PATH")
-        .help("The source to parse. If the source is a directory, the directoy will be recursed looking for any files that end with '$J'.")
+        .help("The source to parse. If the source is a directory, the directoy will \
+        be recursed looking for any files that end with '$J'. (Do not use a directory \
+        if using an MFT file.)")
+        .takes_value(true);
+
+    let usn_arg = Arg::with_name("mft")
+        .short("m")
+        .long("mft")
+        .value_name("MFT")
+        .help("The MFT to use for creating folder mapping.")
         .takes_value(true);
 
     let thread_count = Arg::with_name("threads")
@@ -33,7 +47,8 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .long("--threads")
         .default_value("0")
         .validator(is_a_non_negative_number)
-        .help("Sets the number of worker threads, defaults to number of CPU cores.");
+        .help("Sets the number of worker threads, defaults to number of CPU cores. \
+        If the --mft option is used, the tool can only run single threaded.");
 
     let verbose = Arg::with_name("debug")
         .short("-d")
@@ -48,6 +63,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
         .about("USN Parser written in Rust. Output is JSONL.")
         .arg(source_arg)
+        .arg(usn_arg)
         .arg(thread_count)
         .arg(verbose)
 }
@@ -145,11 +161,11 @@ fn process_directory(directory: &str, options: &ArgMatches) {
 fn process_file(file_location: &str, options: &ArgMatches) {
     info!("processing {}", file_location);
 
-    let threads = options
+    let thread_option = options
             .value_of("threads")
             .and_then(|value| Some(value.parse::<usize>().expect("used validator")));
 
-    let threads = match (cfg!(feature = "multithreading"), threads) {
+    let mut threads = match (cfg!(feature = "multithreading"), thread_option) {
         (true, Some(number)) => number,
         (true, None) => 0,
         (false, _) => {
@@ -157,6 +173,24 @@ fn process_file(file_location: &str, options: &ArgMatches) {
             1
         }
     };
+
+    let mut folder_mapping: Option<FolderMapping> = None;
+
+    if options.is_present("mft") {
+        if threads != 1 {
+            threads = 1;
+            eprintln!("When using MFT to create folder map, threads can only be 1.");
+        }
+
+        let mft_path = options.value_of("mft").unwrap();
+        folder_mapping = match FolderMapping::from_mft_path(mft_path){
+            Ok(mapping) => Some(mapping),
+            Err(err) => {
+                eprintln!("Error creating folder mapping. {}", err);
+                exit(-1);
+            }
+        };
+    }
 
     let config = UsnParserSettings::new().thread_count(threads);
 
@@ -168,9 +202,62 @@ fn process_file(file_location: &str, options: &ArgMatches) {
         }
     };
 
-    for record in parser.records(){
-        let json_str = serde_json::to_string(&record).unwrap();
-        println!("{}", json_str);
+    if folder_mapping.is_some(){
+        // Because we are going to enumerate folder names, we must
+        // iterate records from the newest to oldest inorder to correctly
+        // enumerate the paths. This means we must store all the records 
+        // because they are parsed from oldest to newest. Unfortunately,
+        // this does take up more memory.
+        let mut mapping = folder_mapping.unwrap();
+        let mut entry_list: Vec::<UsnEntry> = Vec::new();
+        for record in parser.records(){
+            entry_list.push(record);
+        }
+        entry_list.reverse();
+
+        for entry in entry_list {
+            let mut entry_json_value = serde_json::to_value(&entry).unwrap();
+            let json_map = entry_json_value.as_object_mut().unwrap();
+            match entry.record {
+                UsnRecord::V2(record) => {
+                    if record.file_attributes.contains(flags::FileAttributes::FILE_ATTRIBUTE_DIRECTORY){
+                        // Add mapping on a delete or rename old
+                        if record.reason.contains(flags::Reason::USN_REASON_FILE_DELETE) ||
+                            record.reason.contains(flags::Reason::USN_REASON_RENAME_OLD_NAME) {
+                            mapping.add_mapping(
+                                record.file_reference,
+                                record.file_name.clone(),
+                                record.parent_reference
+                            );
+                        }
+                    }
+
+                    // Enumerate the path of this record from the FolderMapping
+                    let full_path = match mapping.enumerate_path(
+                        record.parent_reference.entry,
+                        record.parent_reference.sequence
+                    ){
+                        Some(path) => path,
+                        None => "[Unknown]".to_string()
+                    };
+
+                    // Create teh fullname string
+                    let full_name = format!("{}/{}", full_path, record.file_name);
+                    // Add the fullname string to the json record
+                    let fn_value = Value::String(full_name);
+                    json_map.insert("full_name".to_string(), fn_value);
+
+                    // Create a json string to print
+                    let json_str = serde_json::to_string(&json_map).unwrap();
+                    println!("{}", json_str);
+                }
+            }
+        }
+    } else{
+        for record in parser.records(){
+            let json_str = serde_json::to_string(&record).unwrap();
+            println!("{}", json_str);
+        }
     }
 }
 
