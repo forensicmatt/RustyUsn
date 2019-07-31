@@ -59,7 +59,7 @@ fn usn_record_v2_test() {
     assert_eq!(record.reason.bits(), 2);
     assert_eq!(record.source_info.bits(), 0);
     assert_eq!(record.security_id, 0);
-    assert_eq!(record.file_attributes, 8224);
+    assert_eq!(record.file_attributes.bits(), 8224);
     assert_eq!(record.file_name_length, 32);
     assert_eq!(record.file_name_offset, 60);
     assert_eq!(record.file_name, "BTDevManager.log");
