@@ -3,7 +3,8 @@
 A fast and cross platform USN Parser written in Rust. Output is [JSONL](http://jsonlines.org/).
 
 # Tools
-There are currently two tools associated with this package. rusty_usn and listen_usn. Neither currently implement records for usn record version 3 and 4.
+There are currently two tools associated with this package. rusty_usn and listen_usn. Not currently implement records for usn record version 4 or version 3 with utilized 128 bit references. 
+(Works for Version 3 still using 64 bit references in place).
 
 ## rust_usn
 

@@ -6,12 +6,12 @@ use std::thread;
 use std::sync::mpsc;
 use log::LevelFilter;
 use std::process::exit;
-use rusty_usn::record::UsnEntry;
+use serde_json::value::Value;
 use clap::{App, Arg, ArgMatches};
 use std::sync::mpsc::{Sender, Receiver};
-use rusty_usn::listener::listener::UsnVolumeListener;
+use rusty_usn::liveusn::listener::UsnVolumeListener;
 
-static VERSION: &'static str = "0.1.0";
+static VERSION: &'static str = "1.0.0";
 
 
 fn make_app<'a, 'b>() -> App<'a, 'b> {
@@ -96,10 +96,9 @@ fn set_debug_level(matches: &ArgMatches){
 
 fn process_volume(volume_str: &str, options: &ArgMatches) {
     info!("listening on {}", volume_str);
-
     let historical_flag = options.is_present("historical");
 
-    let (tx, rx): (Sender<UsnEntry>, Receiver<UsnEntry>) = mpsc::channel();
+    let (tx, rx): (Sender<Value>, Receiver<Value>) = mpsc::channel();
 
     let volume_listener = UsnVolumeListener::new(
         volume_str.to_string(),
@@ -114,7 +113,9 @@ fn process_volume(volume_str: &str, options: &ArgMatches) {
     loop{
         match rx.recv() {
             Ok(entry) => {
-                let json_str = serde_json::to_string(&entry).unwrap();
+                let json_str = serde_json::to_string(
+                    &entry
+                ).unwrap();
                 println!("{}", json_str);
             },
             Err(_) => panic!("Worker threads disconnected before the solution was found!"),

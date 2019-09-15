@@ -1,8 +1,9 @@
 use std::io;
+use std::fmt;
 use mft::MftParser;
 use crate::ReadSeek;
 use serde::Serialize;
-use lru_cache::LruCache;
+use lru::LruCache;
 use std::collections::HashMap;
 use winstructs::ntfs::mft_reference::MftReference;
 
@@ -14,11 +15,17 @@ pub struct EntryMapping {
 }
 
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub struct FolderMapping {
     pub mapping: HashMap<MftReference, EntryMapping>,
     #[serde(skip_serializing)]
     pub cache: LruCache<MftReference, String>
+}
+
+impl fmt::Debug for FolderMapping {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "FolderMapping {{ mapping: {:?}, cache: LruCache }}", self.mapping)
+    }
 }
 
 impl FolderMapping {
@@ -137,7 +144,7 @@ impl FolderMapping {
                 path_queue.reverse();
                 let full_path = path_queue.join("/");
 
-                self.cache.insert(
+                self.cache.put(
                     lookup_ref, 
                     full_path.clone()
                 );

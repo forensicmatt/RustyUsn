@@ -11,7 +11,6 @@ use clap::{App, Arg, ArgMatches};
 use rusty_usn::mapping::FolderMapping;
 use rusty_usn::usn::{UsnParserSettings, UsnParser};
 use rusty_usn::record::UsnEntry;
-use rusty_usn::record::UsnRecord;
 use rusty_usn::flags;
 
 static VERSION: &'static str = "1.2.0";
@@ -142,11 +141,15 @@ fn process_directory(directory: &str, options: &ArgMatches) {
                     if path.is_file() {
                         let path_string = path.into_os_string().into_string().unwrap();
                         if path_string.to_lowercase().ends_with("$j"){
-                            process_file(&path_string, &options);
+                            process_file(
+                                &path_string, &options
+                            );
                         }
                     } else if path.is_dir(){
                         let path_string = path.into_os_string().into_string().unwrap();
-                        process_directory(&path_string, &options);
+                        process_directory(
+                            &path_string, &options
+                        );
                     }
                 },
                 Err(error) => {
@@ -216,46 +219,55 @@ fn process_file(file_location: &str, options: &ArgMatches) {
         entry_list.reverse();
 
         for entry in entry_list {
-            let mut entry_json_value = serde_json::to_value(&entry).unwrap();
+            let mut entry_json_value = entry.to_json_value().unwrap();
             let json_map = entry_json_value.as_object_mut().unwrap();
-            match entry.record {
-                UsnRecord::V2(record) => {
-                    if record.file_attributes.contains(flags::FileAttributes::FILE_ATTRIBUTE_DIRECTORY){
-                        // Add mapping on a delete or rename old
-                        if record.reason.contains(flags::Reason::USN_REASON_FILE_DELETE) ||
-                            record.reason.contains(flags::Reason::USN_REASON_RENAME_OLD_NAME) {
-                            mapping.add_mapping(
-                                record.file_reference,
-                                record.file_name.clone(),
-                                record.parent_reference
-                            );
-                        }
-                    }
 
-                    // Enumerate the path of this record from the FolderMapping
-                    let full_path = match mapping.enumerate_path(
-                        record.parent_reference.entry,
-                        record.parent_reference.sequence
-                    ){
-                        Some(path) => path,
-                        None => "[Unknown]".to_string()
-                    };
+            let record = entry.record;
 
-                    // Create teh fullname string
-                    let full_name = format!("{}/{}", full_path, record.file_name);
-                    // Add the fullname string to the json record
-                    let fn_value = Value::String(full_name);
-                    json_map.insert("full_name".to_string(), fn_value);
+            let reason = record.get_reason_code();
+            let file_attributes = record.get_file_attributes();
+            let file_reference = record.get_file_reference();
+            let parent_reference = record.get_parent_reference();
+            let file_name = record.get_file_name();
 
-                    // Create a json string to print
-                    let json_str = serde_json::to_string(&json_map).unwrap();
-                    println!("{}", json_str);
+            if file_attributes.contains(flags::FileAttributes::FILE_ATTRIBUTE_DIRECTORY){
+                // Add mapping on a delete or rename old
+                if reason.contains(flags::Reason::USN_REASON_FILE_DELETE) ||
+                    reason.contains(flags::Reason::USN_REASON_RENAME_OLD_NAME) {
+                    mapping.add_mapping(
+                        file_reference,
+                        file_name.clone(),
+                        parent_reference
+                    );
                 }
             }
+
+            // Enumerate the path of this record from the FolderMapping
+            let full_path = match mapping.enumerate_path(
+                parent_reference.entry,
+                parent_reference.sequence
+            ){
+                Some(path) => path,
+                None => "[Unknown]".to_string()
+            };
+
+            // Create teh fullname string
+            let full_name = format!("{}/{}", full_path, file_name);
+
+            // Add the fullname string to the json record
+            let fn_value = Value::String(full_name);
+            json_map.insert("full_name".to_string(), fn_value);
+
+            // Create a json string to print
+            let json_str = serde_json::to_string(&json_map).unwrap();
+            println!("{}", json_str);
         }
     } else{
         for record in parser.records(){
-            let json_str = serde_json::to_string(&record).unwrap();
+            let json_str = serde_json::to_string(
+                &record.to_json_value().unwrap()
+            ).unwrap();
+
             println!("{}", json_str);
         }
     }

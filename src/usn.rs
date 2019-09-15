@@ -10,7 +10,8 @@ use rayon::prelude::*;
 use std::collections::VecDeque;
 use byteorder::{ByteOrder, LittleEndian};
 use crate::ReadSeek;
-use crate::record::UsnEntry;
+use crate::record::{EntryMeta, UsnEntry};
+
 
 // This is the size of data chunks
 const SIZE_CHUNK: usize = 17408;
@@ -22,7 +23,7 @@ const SIZE_SEARCH: usize = 16384;
 
 lazy_static! {
     static ref RE_USN: bytes::Regex = bytes::Regex::new(
-        "(?-u)..\x00\x00\x02\x00\x00\x00"
+        "(?-u)..\x00\x00(\x02|\x03)\x00\x00\x00"
     ).expect("Regex Error");
 }
 
@@ -146,6 +147,7 @@ impl <T: ReadSeek> UsnParser <T> {
                 } else {
                     #[cfg(feature = "multithreading")]
                     let chunk_iter = list_of_chunks.into_par_iter();
+                    
                     #[cfg(not(feature = "multithreading"))]
                     let chunk_iter = list_of_chunks.into_iter();
 
@@ -349,6 +351,7 @@ impl Iterator for IterRecords {
                 Some(offset) => offset,
                 None => break
             };
+
             // index starts at start of hit offset
             let i = start_of_hit as usize;
 
@@ -382,10 +385,15 @@ impl Iterator for IterRecords {
                         continue;
                     }
 
+                    // Create Entry Meta
+                    let entry_meta = EntryMeta::new(
+                        &self.source,
+                        entry_offset
+                    );
+
                     // Parse entry
                     let entry = match UsnEntry::new(
-                        self.source.clone(),
-                        entry_offset, 
+                        entry_meta, 
                         2,
                         &self.block[start_of_hit as usize ..]
                     ) {
@@ -400,6 +408,138 @@ impl Iterator for IterRecords {
                 },
                 other => {
                     debug!("Version not handled: {}; offset: {}", other, entry_offset);
+                    continue;
+                }
+            };
+
+            return Some(usn_entry);
+        }
+
+        None
+    }
+}
+
+
+/// This iterator iterates records from a buffer by index.
+///
+#[derive(Debug)]
+pub struct IterRecordsByIndex {
+    meta: EntryMeta,
+    block: Vec<u8>,
+    index: usize,
+}
+
+impl IterRecordsByIndex {
+    pub fn new(meta: EntryMeta, block: Vec<u8>) -> Self {
+        IterRecordsByIndex {
+            meta: meta,
+            block: block,
+            index: 0
+        }
+    }
+}
+
+impl Iterator for IterRecordsByIndex {
+    type Item = UsnEntry;
+
+    fn next(&mut self) -> Option<UsnEntry> {
+        while self.index < self.block.len() {
+            self.meta.offset += self.index as u64;
+
+            let record_length = LittleEndian::read_u32(
+                &self.block[self.index..self.index+4]
+            );
+            if record_length % 8 != 0 {
+                debug!("not 8 byte aligned at offset {}", self.index);
+                self.index += 8;
+                continue;
+            }
+
+            // Check versions
+            let major = LittleEndian::read_u16(
+                &self.block[self.index+4..self.index+6]
+            );
+            let minor = LittleEndian::read_u16(
+                &self.block[self.index+6..self.index+8]
+            );
+
+            let usn_entry = match major {
+                2 => {
+                    // validate minor version
+                    if minor != 0 {
+                        debug!("minor version does not match major at offset {}", self.index);
+                        self.index += 8;
+                        continue;
+                    }
+
+                    // validate name offset
+                    let name_offset = LittleEndian::read_u16(
+                        &self.block[self.index+58..self.index+60]
+                    );
+                    if name_offset != 60 {
+                        debug!("name offset does not match 60 at offset {}", self.index);
+                        self.index += 8;
+                        continue;
+                    }
+
+                    // Parse entry
+                    let entry = match UsnEntry::new(
+                        self.meta.clone(),
+                        2,
+                        &self.block[self.index as usize ..]
+                    ) {
+                        Ok(entry) => entry,
+                        Err(error) => {
+                            debug!("error at offset {}: {}", self.index, error);
+                            self.index += 8;
+                            continue;
+                        }
+                    };
+
+                    self.index += record_length as usize;
+
+                    entry
+                },
+                3 => {
+                    debug!("entry: {}", hex::encode(&self.block[self.index as usize .. self.index as usize + record_length as usize]));
+                    // validate minor version
+                    if minor != 0 {
+                        debug!("minor version does not match major at offset {}", self.index);
+                        self.index += 8;
+                        continue;
+                    }
+
+                    // validate name offset
+                    let name_offset = LittleEndian::read_u16(
+                        &self.block[self.index+74..self.index+76]
+                    );
+                    if name_offset != 76 {
+                        debug!("name offset [{}] does not match 76 at offset {}", name_offset, self.index);
+                        self.index += 8;
+                        continue;
+                    }
+
+                    // Parse entry
+                    let entry = match UsnEntry::new(
+                        self.meta.clone(),
+                        3,
+                        &self.block[self.index as usize ..]
+                    ) {
+                        Ok(entry) => entry,
+                        Err(error) => {
+                            debug!("error at offset {}: {}", self.index, error);
+                            self.index += 8;
+                            continue;
+                        }
+                    };
+
+                    self.index += record_length as usize;
+
+                    entry
+                }
+                other => {
+                    debug!("Version not handled: {}; offset: {}", other, self.index);
+                    self.index += 8;
                     continue;
                 }
             };

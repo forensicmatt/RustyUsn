@@ -1,7 +1,6 @@
 use std::fmt;
 use serde::ser;
 
-pub static mut FLAGS_AS_INT: bool = false;
 
 bitflags! {
     pub struct FileAttributes: u32 {

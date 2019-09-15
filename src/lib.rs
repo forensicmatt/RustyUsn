@@ -1,17 +1,16 @@
 #[macro_use] extern crate log;
 #[macro_use] extern crate bitflags;
 #[macro_use] extern crate lazy_static;
-extern crate regex;
-extern crate encoding;
-extern crate byteorder;
 
 // Our modules
 pub mod usn;
-pub mod flags;
 pub mod record;
-pub mod usn_err;
-pub mod listener;
+pub mod error;
+pub mod utils;
+pub mod flags;
+pub mod liveusn;
 pub mod mapping;
+
 
 use std::io;
 use std::io::{Read, Seek, SeekFrom};
