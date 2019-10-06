@@ -6,9 +6,20 @@ extern crate rusty_usn;
 fn live_get_entry_test() {
     use rusty_usn::liveusn::live;
 
-    let mut live_ntfs = live::WindowsLiveNtfs::from_volume_path(
+    // Must be admin for this to work
+    let mut live_ntfs = match live::WindowsLiveNtfs::from_volume_path(
         r"\\.\C:"
-    ).unwrap();
+    ) {
+        Ok(l) => l,
+        Err(e) => {
+            if e.message == "Access is denied. (os error 5)" {
+                eprintln!("{:?}", e);
+                return;
+            }
+
+            panic!(e);
+        }
+    };
 
     let mft_entry = live_ntfs.get_entry(0).unwrap();
     let mft_name = match mft_entry.find_best_name_attribute() {
@@ -27,7 +38,15 @@ fn live_volume_info_test() {
     use std::fs::File;
     use rusty_usn::liveusn::winfuncs;
 
-    let file_handle = File::open(r"\\.\C:").unwrap();
+    // Must be admin for this to work
+    let file_handle = match File::open(r"\\.\C:") {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("{:?}", e);
+            return;
+        }
+    };
+
     let _volume_data = winfuncs::get_ntfs_volume_data(
         &file_handle
     ).unwrap();

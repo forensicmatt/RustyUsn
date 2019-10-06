@@ -11,7 +11,10 @@ fn query_test() {
 
     let file_handle = match File::open("\\\\.\\C:") {
         Ok(handle) => handle,
-        Err(error) => panic!(error)
+        Err(error) => {
+            eprintln!("{:?}", error);
+            return;
+        }
     };
 
     match query_usn_journal(&file_handle) {
