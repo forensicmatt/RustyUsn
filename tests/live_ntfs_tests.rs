@@ -1,5 +1,4 @@
 extern crate rusty_usn;
-use std::fs::File;
 
 
 #[cfg(feature = "windows")]
@@ -22,8 +21,10 @@ fn live_get_entry_test() {
     assert_eq!(mft_name, r"$MFT");
 }
 
+#[cfg(feature = "windows")]
 #[test]
 fn live_volume_info_test() {
+    use std::fs::File;
     use rusty_usn::liveusn::winfuncs;
 
     let file_handle = File::open(r"\\.\C:").unwrap();
@@ -32,6 +33,7 @@ fn live_volume_info_test() {
     ).unwrap();
 }
 
+#[cfg(feature = "windows")]
 #[test]
 fn parse_live_volume_data_test() {
     use rusty_usn::liveusn::ntfs;

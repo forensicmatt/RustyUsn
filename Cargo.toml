@@ -30,7 +30,8 @@ rayon = {version = "1.0.3", optional = true}
 [dependencies.mft]
 version = "0.4.5-alpha.0"
 branch = "master"
-git = "https://github.com/forensicmatt/mft"
+git = "https://github.com/omerbenamram/mft.git"
+optional = true
 
 [dependencies.winapi]
 version = "0.3"
@@ -43,7 +44,7 @@ optional = true
 [features]
 default = ["multithreading"]
 multithreading = ["rayon"]
-windows = ["winapi"]
+windows = ["winapi", "mft"]
 
 [[bin]]
 name = "rusty_usn"

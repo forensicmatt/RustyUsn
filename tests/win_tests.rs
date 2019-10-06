@@ -1,10 +1,11 @@
 extern crate rusty_usn;
-use std::fs::File;
 
 #[cfg(feature = "windows")]
 #[test]
 fn query_test() {
-    use rusty_usn::listener::winfuncs::{
+    use std::fs::File;
+    
+    use rusty_usn::liveusn::winfuncs::{
         query_usn_journal
     };
 
