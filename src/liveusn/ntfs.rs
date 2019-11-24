@@ -69,6 +69,10 @@ impl NtfsVolumeData {
             ntfs_extended_volume_data
         }
     }
+
+    pub fn get_max_entry(&self) -> u64 {
+        self.mft_valid_data_length as u64 / self.bytes_per_file_record_segment as u64
+    }
 }
 
 

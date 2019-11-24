@@ -6,6 +6,7 @@ use crate::liveusn::winfuncs;
 use crate::liveusn::error::UsnLiveError;
 use crate::liveusn::ntfs::NtfsVolumeData;
 
+
 #[derive(Debug)]
 pub struct MftOutputBuffer {
     file_reference_number: u64,
@@ -43,6 +44,8 @@ impl MftOutputBuffer {
 }
 
 
+/// Struct for interacting with a live NTFS volume via Windows API
+///
 #[derive(Debug)]
 pub struct WindowsLiveNtfs {
     volume_path: String,
@@ -80,5 +83,62 @@ impl WindowsLiveNtfs {
     pub fn get_entry(&mut self, entry: i64) -> Result<MftEntry, UsnLiveError> {
         let mft_buffer = self.get_entry_buffer(entry)?;
         mft_buffer.as_entry()
+    }
+
+    pub fn get_max_entry(&self) -> u64 {
+        self.ntfs_volume_data.get_max_entry()
+    }
+
+    pub fn get_entry_iterator(self) -> LiveMftEntryIterator {
+        let last_entry = self.get_max_entry();
+
+        LiveMftEntryIterator {
+            live_ntfs: self,
+            current_entry: last_entry as i64 - 1
+        }
+    }
+}
+
+
+/// Iterator to iterate mft entries on a live NTFS volume. The iterator 
+/// returns entries in reverse order (highest to lowest) which maximizes 
+/// performance due to Windows API because FSCTL_GET_NTFS_FILE_RECORD
+/// retrieves the first file record that is in use and is of a lesser than or equal 
+/// ordinal value to the requested file reference number.
+/// The current entry must start at the highest to lowest and be one less than
+/// the max entry
+/// 
+pub struct LiveMftEntryIterator {
+    live_ntfs: WindowsLiveNtfs,
+    current_entry: i64
+}
+impl Iterator for LiveMftEntryIterator {
+    type Item = Result<MftEntry, UsnLiveError>;
+
+    // It is fastest to iterate file entries from highest to lowest becuase
+    // the Windows API fetches the lowest allocated entry if an entry is queried
+    // that is unallocated. This prevents us from having to iterate through blocks
+    // of unallocated entries (in which case the same entry will be returned till the
+    // next allocated) until we find the next allocated.
+    fn next(&mut self) -> Option<Result<MftEntry, UsnLiveError>> {
+        while self.current_entry >= 0 {
+            // Get MFT entry for current entry
+            let mft_entry = match self.live_ntfs.get_entry(
+                self.current_entry as i64
+            ) {
+                Ok(entry) => entry,
+                Err(error) => {
+                    self.current_entry -= 1;
+                    return Some(Err(error))
+                }
+            };
+
+            // Deincrement the entry by 1
+            self.current_entry = mft_entry.header.record_number as i64 - 1;
+
+            return Some(Ok(mft_entry));
+        }
+
+        None
     }
 }
