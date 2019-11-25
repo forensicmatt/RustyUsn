@@ -2,9 +2,11 @@ use std::fs::File;
 use std::io::Read;
 use mft::MftEntry;
 use byteorder::{ReadBytesExt, LittleEndian};
+use crate::mapping::FolderMapping;
 use crate::liveusn::winfuncs;
 use crate::liveusn::error::UsnLiveError;
 use crate::liveusn::ntfs::NtfsVolumeData;
+use winstructs::ntfs::mft_reference::MftReference;
 
 
 #[derive(Debug)]
@@ -66,6 +68,57 @@ impl WindowsLiveNtfs {
                 ntfs_volume_data: ntfs_volume_data
             }
         )
+    }
+
+    pub fn get_folder_mapping(self) -> FolderMapping {
+        // Create the folder mapping
+        let mut folder_mapping = FolderMapping::new();
+
+        // Iterate over live MFT entries
+        let entry_iter = self.get_entry_iterator();
+        for entry_result in entry_iter {
+            match entry_result {
+                Ok(entry) => {
+                    // We only want directories
+                    if !entry.is_dir() {
+                        continue;
+                    }
+
+                    let mut l_entry = entry.header.record_number;
+                    let mut l_sequence = entry.header.sequence;
+
+                    // if entry is child, set entry and sequence to parent
+                    if entry.header.base_reference.entry != 0 {
+                        l_entry = entry.header.base_reference.entry;
+                        l_sequence = entry.header.base_reference.sequence;
+                    }
+
+                    // Get the best name attribute or <NA>
+                    let fn_attr = match entry.find_best_name_attribute() {
+                        Some(fn_attr) => fn_attr,
+                        None => continue
+                    };
+
+                    // Entry reference for our key
+                    let entry_reference = MftReference::new(
+                        l_entry,
+                        l_sequence
+                    );
+
+                    // Add this entry to the folder mapping
+                    folder_mapping.add_mapping(
+                        entry_reference,
+                        fn_attr.name,
+                        fn_attr.parent
+                    );
+                },
+                Err(error) => {
+                    eprintln!("{:?}", error);
+                }
+            }
+        }
+
+        folder_mapping
     }
 
     fn get_entry_buffer(&mut self, entry: i64) -> Result<MftOutputBuffer, UsnLiveError> {

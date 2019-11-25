@@ -6,6 +6,7 @@ use serde::Serialize;
 use lru::LruCache;
 use std::collections::HashMap;
 use winstructs::ntfs::mft_reference::MftReference;
+use serde::ser::{Serializer, SerializeMap};
 
 
 #[derive(Serialize, Debug)]
@@ -15,10 +16,8 @@ pub struct EntryMapping {
 }
 
 
-#[derive(Serialize)]
 pub struct FolderMapping {
     pub mapping: HashMap<MftReference, EntryMapping>,
-    #[serde(skip_serializing)]
     pub cache: LruCache<MftReference, String>
 }
 
@@ -29,6 +28,16 @@ impl fmt::Debug for FolderMapping {
 }
 
 impl FolderMapping {
+    pub fn new() -> Self {
+        let mapping: HashMap<MftReference, EntryMapping> = HashMap::new();
+        let cache: LruCache<MftReference, String> = LruCache::new(100);
+
+        FolderMapping {
+            mapping,
+            cache
+        }
+    }
+
     pub fn from_mft_path(filename: &str) -> Result<Self, io::Error> {
         let mapping: HashMap<MftReference, EntryMapping> = HashMap::new();
         let mut parser = MftParser::from_path(filename).unwrap();
@@ -152,5 +161,20 @@ impl FolderMapping {
                 return Some(full_path);
             }
         }
+    }
+}
+
+impl Serialize for FolderMapping {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(self.mapping.len()))?;
+        for (k, v) in &self.mapping {
+            map.serialize_entry(
+                &k.entry, &v
+            )?;
+        }
+        map.end()
     }
 }
