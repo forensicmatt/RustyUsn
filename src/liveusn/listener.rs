@@ -108,6 +108,14 @@ impl UsnVolumeListener {
                                 mapping.remove_mapping(
                                     file_ref
                                 );
+                            } else if reason_code.contains(flags::Reason::USN_REASON_RENAME_NEW_NAME) ||
+                                reason_code.contains(flags::Reason::USN_REASON_FILE_CREATE) {
+                                // If its a new name or creation, we need to updated the mapping
+                                mapping.add_mapping(
+                                    file_ref, 
+                                    file_name.clone(), 
+                                    parent_ref
+                                )
                             }
                         }
 
