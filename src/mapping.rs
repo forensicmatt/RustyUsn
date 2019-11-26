@@ -103,6 +103,12 @@ impl FolderMapping {
         }
     }
 
+    pub fn remove_mapping(&mut self, entry_reference: MftReference) {
+        self.mapping.remove(
+            &entry_reference
+        );
+    }
+
     pub fn add_mapping(&mut self, entry_reference: MftReference, name: String, parent: MftReference) {
         let entry_map = EntryMapping{
             name: name,

@@ -12,7 +12,8 @@ use crate::liveusn::winfuncs::{
     read_usn_journal,
 };
 use crate::usn::IterRecordsByIndex;
-use crate::liveusn::mapping::LiveMapping;
+use crate::liveusn::error::UsnLiveError;
+use crate::liveusn::live::WindowsLiveNtfs;
 use crate::liveusn::ntfs::ReadUsnJournalData;
 
 
@@ -24,7 +25,7 @@ pub struct UsnVolumeListener {
 }
 
 impl UsnVolumeListener {
-    pub fn new(source: String, historical_flag: bool, sender: Sender<Value>) -> UsnVolumeListener {
+    pub fn new(source: String, historical_flag: bool, sender: Sender<Value>) -> Self {
         let sleep_ms = 100;
 
         UsnVolumeListener {
@@ -35,16 +36,12 @@ impl UsnVolumeListener {
         }
     }
 
-    pub fn listen_to_volume(self) {
-        let mut live_mapping = match LiveMapping::from_volume_path(
+    pub fn listen_to_volume(self) -> Result<(), UsnLiveError> {
+        let live_volume = WindowsLiveNtfs::from_volume_path(
             &self.source
-        ){
-            Ok(mapping) => mapping,
-            Err(e) => {
-                eprintln!("Error creating LiveMapping: {:?}", e);
-                return;
-            }
-        };
+        )?;
+
+        let mut mapping = live_volume.get_folder_mapping();
 
         let file_handle = match File::open(self.source.clone()) {
             Ok(handle) => handle,
@@ -98,6 +95,7 @@ impl UsnVolumeListener {
                     let mut record_count: u64 = 0;
                     for usn_entry in record_iterator {
                         let file_name = usn_entry.record.get_file_name();
+                        let file_ref = usn_entry.record.get_file_reference();
                         let reason_code = usn_entry.record.get_reason_code();
                         let parent_ref = usn_entry.record.get_parent_reference();
                         let file_attributes = usn_entry.record.get_file_attributes();
@@ -107,20 +105,19 @@ impl UsnVolumeListener {
                             if reason_code.contains(flags::Reason::USN_REASON_FILE_DELETE) ||
                                 reason_code.contains(flags::Reason::USN_REASON_RENAME_OLD_NAME) {
                                 // Remove from cache because these will no longer be valid.
-                                live_mapping.remove_path_from_cache(
-                                    parent_ref.entry as i64
+                                mapping.remove_mapping(
+                                    file_ref
                                 );
                             }
                         }
 
-                        let full_path = match live_mapping.get_full_path(
-                            parent_ref.entry as i64
-                        ) {
-                            Ok(path) => path,
-                            Err(e) => {
-                                eprintln!("Error getting path for entry {}: {:?}", parent_ref.entry, e);
-                                continue;
-                            }
+                        // Enumerate the path of this record from the FolderMapping
+                        let full_path = match mapping.enumerate_path(
+                            parent_ref.entry,
+                            parent_ref.sequence
+                        ){
+                            Some(path) => path,
+                            None => "[Unknown]".to_string()
                         };
 
                         let mut entry_value = match usn_entry.to_json_value(){
@@ -166,5 +163,7 @@ impl UsnVolumeListener {
                 );
             }
         }
+
+        Ok(())
     }
 }
