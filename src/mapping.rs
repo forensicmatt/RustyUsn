@@ -110,10 +110,16 @@ impl FolderMapping {
     }
 
     pub fn add_mapping(&mut self, entry_reference: MftReference, name: String, parent: MftReference) {
-        let entry_map = EntryMapping{
+        let entry_map = EntryMapping {
             name: name,
             parent: parent
         };
+
+        // If there is a cached entry for this reference, we need to remove it
+        // so that it can be recreated with the new mapping.
+        self.cache.pop(
+            &entry_reference
+        );
 
         self.mapping.insert(
             entry_reference,
