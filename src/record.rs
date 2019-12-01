@@ -92,6 +92,13 @@ impl UsnRecord {
         }
     }
 
+    pub fn get_usn(&self) -> u64 {
+        match self {
+            UsnRecord::V2(ref record) => record.usn.clone(),
+            UsnRecord::V3(ref record) => record.usn.clone(),
+        }
+    }
+
     pub fn get_file_name(&self) -> String {
         match self {
             UsnRecord::V2(ref record) => record.file_name.clone(),
