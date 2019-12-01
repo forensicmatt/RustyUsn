@@ -20,6 +20,9 @@ fn live_mapping_test() {
         }
     };
 
-    let path = live_mapping.get_full_path(32).unwrap();
-    assert_eq!(path, r"$Extend\$RmMetadata\$TxfLog\$Tops");
+    let path = live_mapping.get_full_path(24).unwrap();
+    assert_eq!(
+        path, 
+        r"$Extend/$Quota"
+    );
 }
