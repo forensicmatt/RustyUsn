@@ -38,6 +38,12 @@ impl FolderMapping {
         }
     }
 
+    pub fn contains_reference(&self, entry_reference: &MftReference) -> bool {
+        self.mapping.contains_key(
+            entry_reference
+        )
+    }
+
     pub fn from_mft_path(filename: &str) -> Result<Self, io::Error> {
         let mapping: HashMap<MftReference, EntryMapping> = HashMap::new();
         let mut parser = MftParser::from_path(filename).unwrap();
@@ -138,7 +144,9 @@ impl FolderMapping {
                         path_queue
                     );
                 },
-                None => {}
+                None => {
+                    path_queue.push("[<unknown>]".to_string());
+                }
             }
         } else {
             path_queue.push("[root]".to_string());
