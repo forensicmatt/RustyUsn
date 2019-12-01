@@ -11,7 +11,7 @@ use clap::{App, Arg, ArgMatches};
 use std::sync::mpsc::{Sender, Receiver};
 use rusty_usn::liveusn::listener::UsnVolumeListener;
 
-static VERSION: &'static str = "1.0.0";
+static VERSION: &'static str = "1.1.0";
 
 
 fn make_app<'a, 'b>() -> App<'a, 'b> {
