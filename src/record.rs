@@ -196,14 +196,14 @@ impl UsnRecordV2 {
         if record_length == 0 {
             return Err(
                 UsnError::invalid_v2_record(
-                    format!("Record length is 0.")
+                    "Record length is 0.".to_string()
                 )
             );
         }
         if record_length > 1024 {
             return Err(
                 UsnError::invalid_v2_record(
-                    format!("Record length is over 1024.")
+                    "Record length is over 1024.".to_string()
                 )
             );
         }
@@ -212,7 +212,7 @@ impl UsnRecordV2 {
         if major_version != 2 {
             return Err(
                 UsnError::invalid_v2_record(
-                    format!("Major version is not 2")
+                    "Major version is not 2".to_string()
                 )
             );
         }
@@ -221,7 +221,7 @@ impl UsnRecordV2 {
         if minor_version != 0 {
             return Err(
                 UsnError::invalid_v2_record(
-                    format!("Minor version is not 0")
+                    "Minor version is not 0".to_string()
                 )
             );
         }
@@ -338,14 +338,14 @@ impl UsnRecordV3 {
         if record_length == 0 {
             return Err(
                 UsnError::invalid_record(
-                    format!("Record length is 0.")
+                    "Record length is 0.".to_string()
                 )
             );
         }
         if record_length > 1024 {
             return Err(
                 UsnError::invalid_record(
-                    format!("Record length is over 1024.")
+                    "Record length is over 1024.".to_string()
                 )
             );
         }
@@ -354,7 +354,7 @@ impl UsnRecordV3 {
         if major_version != 3 {
             return Err(
                 UsnError::invalid_record(
-                    format!("Major version is not 3")
+                    "Major version is not 3".to_string()
                 )
             );
         }
@@ -363,7 +363,7 @@ impl UsnRecordV3 {
         if minor_version != 0 {
             return Err(
                 UsnError::invalid_record(
-                    format!("Minor version is not 0")
+                    "Minor version is not 0".to_string()
                 )
             );
         }

@@ -69,7 +69,7 @@ impl FolderMapping {
                         let mut l_sequence = e.header.sequence;
 
                         if !e.is_allocated() {
-                            l_sequence = l_sequence - 1;
+                            l_sequence -= 1;
                         }
 
                         // if entry is child, set entry and sequence to parent
