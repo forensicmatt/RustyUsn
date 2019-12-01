@@ -51,3 +51,7 @@ name = "rusty_usn"
 [[bin]]
 name = "listen_usn"
 required-features = ["windows"]
+
+[[example]]
+name = "print_live_folder_mapping"
+required-features = ["windows"]

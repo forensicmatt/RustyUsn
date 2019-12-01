@@ -50,5 +50,4 @@ fn main() {
     for this in iter {
         println!("{:?}", this);
     }
-
 }
