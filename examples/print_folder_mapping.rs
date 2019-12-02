@@ -38,7 +38,7 @@ fn make_app<'a, 'b>() -> App<'a, 'b> {
         .possible_values(&["Off", "Error", "Warn", "Info", "Debug", "Trace"])
         .help("Debug level to use.");
 
-    App::new("listen_usn")
+    App::new("print_folder_mapping")
         .version(VERSION)
         .author("Matthew Seyer <https://github.com/forensicmatt/RustyUsn>")
         .about("Print folder mapping from mft.")

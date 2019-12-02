@@ -6,6 +6,7 @@ use serde::Serialize;
 use lru::LruCache;
 use std::collections::HashMap;
 use winstructs::ntfs::mft_reference::MftReference;
+use serde::ser::{Serializer, SerializeMap};
 
 
 #[derive(Serialize, Debug)]
@@ -15,10 +16,8 @@ pub struct EntryMapping {
 }
 
 
-#[derive(Serialize)]
 pub struct FolderMapping {
     pub mapping: HashMap<MftReference, EntryMapping>,
-    #[serde(skip_serializing)]
     pub cache: LruCache<MftReference, String>
 }
 
@@ -29,6 +28,22 @@ impl fmt::Debug for FolderMapping {
 }
 
 impl FolderMapping {
+    pub fn new() -> Self {
+        let mapping: HashMap<MftReference, EntryMapping> = HashMap::new();
+        let cache: LruCache<MftReference, String> = LruCache::new(100);
+
+        FolderMapping {
+            mapping,
+            cache
+        }
+    }
+
+    pub fn contains_reference(&self, entry_reference: &MftReference) -> bool {
+        self.mapping.contains_key(
+            entry_reference
+        )
+    }
+
     pub fn from_mft_path(filename: &str) -> Result<Self, io::Error> {
         let mapping: HashMap<MftReference, EntryMapping> = HashMap::new();
         let mut parser = MftParser::from_path(filename).unwrap();
@@ -54,7 +69,7 @@ impl FolderMapping {
                         let mut l_sequence = e.header.sequence;
 
                         if !e.is_allocated() {
-                            l_sequence = l_sequence - 1;
+                            l_sequence -= 1;
                         }
 
                         // if entry is child, set entry and sequence to parent
@@ -94,11 +109,23 @@ impl FolderMapping {
         }
     }
 
+    pub fn remove_mapping(&mut self, entry_reference: MftReference) {
+        self.mapping.remove(
+            &entry_reference
+        );
+    }
+
     pub fn add_mapping(&mut self, entry_reference: MftReference, name: String, parent: MftReference) {
-        let entry_map = EntryMapping{
+        let entry_map = EntryMapping {
             name: name,
             parent: parent
         };
+
+        // If there is a cached entry for this reference, we need to remove it
+        // so that it can be recreated with the new mapping.
+        self.cache.pop(
+            &entry_reference
+        );
 
         self.mapping.insert(
             entry_reference,
@@ -117,7 +144,9 @@ impl FolderMapping {
                         path_queue
                     );
                 },
-                None => {}
+                None => {
+                    path_queue.push("[<unknown>]".to_string());
+                }
             }
         } else {
             path_queue.push("[root]".to_string());
@@ -152,5 +181,20 @@ impl FolderMapping {
                 return Some(full_path);
             }
         }
+    }
+}
+
+impl Serialize for FolderMapping {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(self.mapping.len()))?;
+        for (k, v) in &self.mapping {
+            map.serialize_entry(
+                &k.entry, &v
+            )?;
+        }
+        map.end()
     }
 }

@@ -12,7 +12,8 @@ use crate::liveusn::winfuncs::{
     read_usn_journal,
 };
 use crate::usn::IterRecordsByIndex;
-use crate::liveusn::mapping::LiveMapping;
+use crate::liveusn::error::UsnLiveError;
+use crate::liveusn::live::WindowsLiveNtfs;
 use crate::liveusn::ntfs::ReadUsnJournalData;
 
 
@@ -24,7 +25,7 @@ pub struct UsnVolumeListener {
 }
 
 impl UsnVolumeListener {
-    pub fn new(source: String, historical_flag: bool, sender: Sender<Value>) -> UsnVolumeListener {
+    pub fn new(source: String, historical_flag: bool, sender: Sender<Value>) -> Self {
         let sleep_ms = 100;
 
         UsnVolumeListener {
@@ -35,16 +36,12 @@ impl UsnVolumeListener {
         }
     }
 
-    pub fn listen_to_volume(self) {
-        let mut live_mapping = match LiveMapping::from_volume_path(
+    pub fn listen_to_volume(self) -> Result<(), UsnLiveError> {
+        let live_volume = WindowsLiveNtfs::from_volume_path(
             &self.source
-        ){
-            Ok(mapping) => mapping,
-            Err(e) => {
-                eprintln!("Error creating LiveMapping: {:?}", e);
-                return;
-            }
-        };
+        )?;
+
+        let mut mapping = live_volume.get_folder_mapping();
 
         let file_handle = match File::open(self.source.clone()) {
             Ok(handle) => handle,
@@ -66,6 +63,7 @@ impl UsnVolumeListener {
         };
 
         let mut next_start_usn: u64 = usn_journal_data.get_next_usn();
+        let catch_up_usn = next_start_usn;
 
         if self.historical_flag {
             next_start_usn = 0;
@@ -97,30 +95,55 @@ impl UsnVolumeListener {
 
                     let mut record_count: u64 = 0;
                     for usn_entry in record_iterator {
+                        let entry_usn = usn_entry.record.get_usn();
                         let file_name = usn_entry.record.get_file_name();
+                        let file_ref = usn_entry.record.get_file_reference();
                         let reason_code = usn_entry.record.get_reason_code();
                         let parent_ref = usn_entry.record.get_parent_reference();
                         let file_attributes = usn_entry.record.get_file_attributes();
 
-
                         if file_attributes.contains(flags::FileAttributes::FILE_ATTRIBUTE_DIRECTORY){
-                            if reason_code.contains(flags::Reason::USN_REASON_FILE_DELETE) ||
-                                reason_code.contains(flags::Reason::USN_REASON_RENAME_OLD_NAME) {
-                                // Remove from cache because these will no longer be valid.
-                                live_mapping.remove_path_from_cache(
-                                    parent_ref.entry as i64
+                            if reason_code.contains(flags::Reason::USN_REASON_RENAME_OLD_NAME) {
+                                // We can remove old names from the mapping because we no longer need these.
+                                // On new names, we add the name to the mapping.
+                                mapping.remove_mapping(
+                                    file_ref
                                 );
+                            }
+                            else if reason_code.contains(flags::Reason::USN_REASON_FILE_DELETE) {
+                                // If we are starting from historical entries, we need to add deleted
+                                // entries to the map until we catch up to the current system, then we can 
+                                // start removing deleted entries. This is because our mapping cannot
+                                // get unallocated entries from the MFT via the Windows API.
+                                if self.historical_flag && entry_usn < catch_up_usn {
+                                    mapping.add_mapping(
+                                        file_ref, 
+                                        file_name.clone(), 
+                                        parent_ref
+                                    )
+                                } else {
+                                    mapping.remove_mapping(
+                                        file_ref
+                                    );
+                                }
+                            } else if reason_code.contains(flags::Reason::USN_REASON_RENAME_NEW_NAME) ||
+                                reason_code.contains(flags::Reason::USN_REASON_FILE_CREATE) {
+                                // If its a new name or creation, we need to updated the mapping
+                                mapping.add_mapping(
+                                    file_ref, 
+                                    file_name.clone(), 
+                                    parent_ref
+                                )
                             }
                         }
 
-                        let full_path = match live_mapping.get_full_path(
-                            parent_ref.entry as i64
-                        ) {
-                            Ok(path) => path,
-                            Err(e) => {
-                                eprintln!("Error getting path for entry {}: {:?}", parent_ref.entry, e);
-                                continue;
-                            }
+                        // Enumerate the path of this record from the FolderMapping
+                        let full_path = match mapping.enumerate_path(
+                            parent_ref.entry,
+                            parent_ref.sequence
+                        ){
+                            Some(path) => path,
+                            None => "[<unknown>]".to_string()
                         };
 
                         let mut entry_value = match usn_entry.to_json_value(){
@@ -166,5 +189,7 @@ impl UsnVolumeListener {
                 );
             }
         }
+
+        Ok(())
     }
 }
