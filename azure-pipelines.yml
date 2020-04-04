@@ -24,13 +24,14 @@ pool:
 
 steps:
   - script: |
-      curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUSTUP_TOOLCHAIN
+      curl https://sh.rustup.rs -sSf | sh -s -- -y --target $RUSTUP_TOOLCHAIN
       echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
     displayName: Install rust
     condition: ne( variables['Agent.OS'], 'Windows_NT' )
+
   - script: |
       curl -sSf -o rustup-init.exe https://win.rustup.rs
-      rustup-init.exe -y --default-toolchain %RUSTUP_TOOLCHAIN%
+      rustup-init.exe -y ---target %RUSTUP_TOOLCHAIN%
       echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
     displayName: Windows install rust
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
@@ -69,11 +70,6 @@ steps:
     displayName: "Create rusty_usn variable (NOT Windows_NT)"
     condition: ne( variables['Agent.OS'], 'Windows_NT' )
 
-  - bash: |
-      echo "##vso[task.setvariable variable=build.binary_name2]listen_usn.exe"
-    displayName: "Create listen_usn variable (Windows_NT)"
-    condition: eq( variables['Agent.OS'], 'Windows_NT' )
-
   - task: CopyFiles@2
     displayName: Copy rusty_usn
     inputs:
@@ -81,15 +77,6 @@ steps:
       contents: |
         $(build.binary_name)
       targetFolder: '$(Build.BinariesDirectory)'
-
-  - task: CopyFiles@2
-    displayName: Copy listen_usn
-    inputs:
-      sourceFolder: '$(Build.SourcesDirectory)/target/release'
-      contents: |
-        $(build.binary_name2)
-      targetFolder: '$(Build.BinariesDirectory)'
-      condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
   - task: ArchiveFiles@2
     displayName: Gather assets (Non-Windows)
